@@ -1,10 +1,12 @@
 # Evidently Data Drift Monitoring
 
-This directory contains configuration and outputs for [Evidently](https://evidentlyai.com/) data drift monitoring.
+This directory contains configuration and outputs for
+[Evidently](https://evidentlyai.com/) data drift monitoring.
 
 ## Overview
 
 Evidently monitors:
+
 - **Data Drift**: Distribution changes in features over time
 - **Target Drift**: Changes in prediction target distribution
 - **Model Performance**: Accuracy, precision, recall degradation
@@ -36,10 +38,12 @@ reference_data = pd.read_csv("data/reference.csv")
 current_data = pd.read_csv("data/current.csv")
 
 # Generate report
-report = Report(metrics=[
-    DataDriftPreset(),
-    DataQualityPreset(),
-])
+report = Report(
+    metrics=[
+        DataDriftPreset(),
+        DataQualityPreset(),
+    ]
+)
 
 report.run(reference_data=reference_data, current_data=current_data)
 
@@ -86,10 +90,12 @@ from evidently.test_suite import TestSuite
 from evidently.tests import TestColumnDrift
 
 # Define tests
-tests = TestSuite(tests=[
-    TestColumnDrift(column_name='feature_1'),
-    TestColumnDrift(column_name='feature_2'),
-])
+tests = TestSuite(
+    tests=[
+        TestColumnDrift(column_name="feature_1"),
+        TestColumnDrift(column_name="feature_2"),
+    ]
+)
 
 # Run on batch of predictions
 tests.run(reference_data=reference, current_data=current)
@@ -97,7 +103,7 @@ tests.run(reference_data=reference, current_data=current)
 # Get results
 results = tests.as_dict()
 
-if results['failed']:
+if results["failed"]:
     # Alert or trigger retraining
     send_alert("Data drift detected!")
 ```
@@ -118,7 +124,7 @@ Configure alerts based on thresholds:
 ```python
 if drift_score > 0.15:
     send_slack_alert("High data drift detected!")
-    
+
 if missing_values_pct > 5.0:
     send_slack_alert("Data quality issue!")
 ```
@@ -126,13 +132,12 @@ if missing_values_pct > 5.0:
 ## Best Practices
 
 1. **Baseline Data**: Use recent production data as reference
-2. **Regular Updates**: Update reference data periodically
-3. **Multiple Windows**: Monitor short-term and long-term drift
-4. **Feature Importance**: Focus on important features first
-5. **Actionable Alerts**: Set thresholds that trigger retraining
+1. **Regular Updates**: Update reference data periodically
+1. **Multiple Windows**: Monitor short-term and long-term drift
+1. **Feature Importance**: Focus on important features first
+1. **Actionable Alerts**: Set thresholds that trigger retraining
 
 ## Resources
 
 - [Evidently Documentation](https://docs.evidentlyai.com/)
 - [Drift Detection Guide](https://www.evidentlyai.com/blog/ml-monitoring-data-drift-detection)
-

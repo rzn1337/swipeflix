@@ -32,9 +32,9 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             ).inc()
 
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(
-                method=method, endpoint=path
-            ).observe(duration)
+            http_request_duration_seconds.labels(method=method, endpoint=path).observe(
+                duration
+            )
 
             # Log request
             logger.info(
@@ -48,11 +48,13 @@ class MetricsMiddleware(BaseHTTPMiddleware):
             http_requests_total.labels(method=method, endpoint=path, status=500).inc()
 
             duration = time.time() - start_time
-            http_request_duration_seconds.labels(
-                method=method, endpoint=path
-            ).observe(duration)
+            http_request_duration_seconds.labels(method=method, endpoint=path).observe(
+                duration
+            )
 
-            logger.error(f"{method} {path} - Error: {str(e)} - Duration: {duration:.3f}s")
+            logger.error(
+                f"{method} {path} - Error: {str(e)} - Duration: {duration:.3f}s"
+            )
             raise
 
 
@@ -73,4 +75,3 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         )
 
         return response
-

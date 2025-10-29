@@ -38,9 +38,9 @@ make_requests() {
     local method=$3
     local data=$4
     local delay=$5
-    
+
     echo -e "${BLUE}Making $count requests to $endpoint...${NC}"
-    
+
     for i in $(seq 1 $count); do
         if [ "$method" == "POST" ]; then
             curl -s -X POST "$API_URL$endpoint" \
@@ -49,15 +49,15 @@ make_requests() {
         else
             curl -s "$API_URL$endpoint" > /dev/null
         fi
-        
+
         # Progress indicator
         if [ $((i % 10)) -eq 0 ]; then
             echo -ne "\rProgress: $i/$count"
         fi
-        
+
         sleep "$delay"
     done
-    
+
     echo -e "\r${GREEN}✓ Completed $count requests to $endpoint${NC}"
 }
 
@@ -74,15 +74,15 @@ echo -e "\n${YELLOW}3. Generating prediction requests...${NC}"
 for i in $(seq 1 30); do
     USER_ID=$((RANDOM % 1000 + 1))
     TOP_K=$((RANDOM % 10 + 5))
-    
+
     curl -s -X POST "$API_URL/predict" \
         -H "Content-Type: application/json" \
         -d "{\"user_id\": \"user_$USER_ID\", \"top_k\": $TOP_K}" > /dev/null
-    
+
     if [ $((i % 5)) -eq 0 ]; then
         echo -ne "\rProgress: $i/30"
     fi
-    
+
     sleep 0.3
 done
 echo -e "\r${GREEN}✓ Completed 30 prediction requests${NC}"
@@ -92,7 +92,7 @@ echo -e "\n${YELLOW}4. Generating mixed traffic pattern...${NC}"
 for i in $(seq 1 50); do
     # Random endpoint
     RAND=$((RANDOM % 10))
-    
+
     if [ $RAND -lt 6 ]; then
         # 60% health checks
         curl -s "$API_URL/health" > /dev/null
@@ -106,11 +106,11 @@ for i in $(seq 1 50); do
             -H "Content-Type: application/json" \
             -d "{\"user_id\": \"user_$USER_ID\", \"top_k\": 5}" > /dev/null
     fi
-    
+
     if [ $((i % 10)) -eq 0 ]; then
         echo -ne "\rProgress: $i/50"
     fi
-    
+
     sleep 0.1
 done
 echo -e "\r${GREEN}✓ Completed 50 mixed requests${NC}"
@@ -146,4 +146,3 @@ echo ""
 echo "To generate continuous traffic:"
 echo "  watch -n 5 bash scripts/generate_test_traffic.sh"
 echo ""
-

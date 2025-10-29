@@ -1,6 +1,8 @@
 # 🎬 SwipeFlix - Swipe-First Movie Recommender
 
-**One-line pitch:** A hybrid movie recommendation system that combines collaborative filtering and content-based approaches, packaged as a production-ready FastAPI service with complete MLOps infrastructure.
+**One-line pitch:** A hybrid movie recommendation system that combines collaborative
+filtering and content-based approaches, packaged as a production-ready FastAPI service
+with complete MLOps infrastructure.
 
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
@@ -8,7 +10,7 @@
 ![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
----
+______________________________________________________________________
 
 ## 📐 Architecture
 
@@ -19,13 +21,13 @@ graph TB
         MinIO[MinIO Object Storage]
         DVC[DVC Data Versioning]
     end
-    
+
     subgraph "Training Pipeline"
         Train[Training Script]
         MLflow[MLflow Tracking Server]
         Registry[Model Registry]
     end
-    
+
     subgraph "Inference API"
         FastAPI[FastAPI Service]
         Model[Loaded PyFunc Model]
@@ -33,20 +35,20 @@ graph TB
         Predict[/predict endpoint]
         Metrics[/metrics endpoint]
     end
-    
+
     subgraph "Monitoring Stack"
         Prometheus[Prometheus]
         Grafana[Grafana Dashboards]
         Evidently[Evidently Data Drift]
     end
-    
+
     subgraph "CI/CD"
         GHA[GitHub Actions]
         GHCR[GitHub Container Registry]
         Tests[Pytest + Coverage]
         K6[k6 Load Tests]
     end
-    
+
     CSV --> DVC
     DVC --> MinIO
     CSV --> Train
@@ -66,19 +68,21 @@ graph TB
     GHCR --> FastAPI
 ```
 
----
+______________________________________________________________________
 
 ## 🎁 Bonus Features Implemented (All 5!)
 
 SwipeFlix implements **ALL 5 bonus features** as specified in Milestone 1 requirements:
 
 ### ✅ Bonus 1: Docker Compose with Profiles
+
 - **Dev, Test, Prod profiles** - Separate environment configurations
 - **Individual service control** - Run specific services (app, db, prometheus, etc.)
 - **Location:** `docker-compose.yml`
 - **Usage:** `docker-compose --profile dev up` or `docker-compose up app mlflow`
 
 ### ✅ Bonus 2: GPU-Enabled Image & Self-Hosted Runner
+
 - **GPU Docker image** - NVIDIA CUDA 11.8 support for accelerated training
 - **Self-hosted runner documentation** - Complete setup guide for GPU-enabled CI/CD
 - **Location:** `Dockerfile.gpu`, `docs/GPU_RUNNER_SETUP.md`
@@ -86,19 +90,22 @@ SwipeFlix implements **ALL 5 bonus features** as specified in Milestone 1 requir
 - **Usage:** `make docker-build-gpu`
 
 ### ✅ Bonus 3: Infrastructure as Code (Terraform)
+
 - **Local MinIO & PostgreSQL provisioning** - Terraform configuration
 - **Declarative infrastructure** - Version-controlled infrastructure setup
 - **Location:** `infra/terraform/` (main.tf, variables.tf)
 - **Usage:** `cd infra/terraform && terraform apply`
 
 ### ✅ Bonus 4: End-to-End Load Testing with k6
-- **SLO assertions** - p95 < 500ms, error rate < 1%
+
+- **SLO assertions** - p95 \< 500ms, error rate \< 1%
 - **Multi-stage load profile** - Ramp-up, steady state, ramp-down
 - **Location:** `k6/script.js`, `k6/README.md`
 - **CI Integration:** Runs on tagged releases
 - **Usage:** `k6 run k6/script.js`
 
 ### ✅ Bonus 5: Data Version Control (DVC)
+
 - **DVC pipeline** - Versioned data and model artifacts
 - **MinIO remote** - S3-compatible storage backend
 - **Location:** `dvc.yaml`, `.dvc/config`
@@ -106,11 +113,12 @@ SwipeFlix implements **ALL 5 bonus features** as specified in Milestone 1 requir
 
 **See detailed documentation for each bonus feature in the sections below.**
 
----
+______________________________________________________________________
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Docker & Docker Compose
 - Make
@@ -135,7 +143,8 @@ source venv/bin/activate  # Linux/Mac
 make start
 ```
 
-The API will be available at `http://localhost:8000`. Visit `http://localhost:8000/docs` for interactive API documentation.
+The API will be available at `http://localhost:8000`. Visit `http://localhost:8000/docs`
+for interactive API documentation.
 
 ### Docker Compose Stack (Recommended)
 
@@ -152,27 +161,27 @@ docker-compose --profile dev up --build
 # - Evidently: http://localhost:7000
 ```
 
----
+______________________________________________________________________
 
 ## 🎯 Make Targets
 
-| Target | Description |
-|--------|-------------|
-| `make dev` | Create virtual environment and install dependencies |
-| `make start` | Run FastAPI server locally (uvicorn) |
-| `make train` | Train model with sample data (quick) |
-| `make train-full` | Train model on full dataset |
-| `make lint` | Run ruff linter |
-| `make fmt` | Format code with black |
-| `make test` | Run pytest with coverage (≥80% required) |
-| `make docker-build` | Build production Docker image |
-| `make docker-run` | Run Docker container locally |
-| `make compose-up` | Start Docker Compose dev stack |
-| `make compose-down` | Stop Docker Compose stack |
-| `make precommit` | Run pre-commit hooks on all files |
-| `make clean` | Clean up temporary files |
+| Target              | Description                                         |
+| ------------------- | --------------------------------------------------- |
+| `make dev`          | Create virtual environment and install dependencies |
+| `make start`        | Run FastAPI server locally (uvicorn)                |
+| `make train`        | Train model with sample data (quick)                |
+| `make train-full`   | Train model on full dataset                         |
+| `make lint`         | Run ruff linter                                     |
+| `make fmt`          | Format code with black                              |
+| `make test`         | Run pytest with coverage (≥80% required)            |
+| `make docker-build` | Build production Docker image                       |
+| `make docker-run`   | Run Docker container locally                        |
+| `make compose-up`   | Start Docker Compose dev stack                      |
+| `make compose-down` | Stop Docker Compose stack                           |
+| `make precommit`    | Run pre-commit hooks on all files                   |
+| `make clean`        | Clean up temporary files                            |
 
----
+______________________________________________________________________
 
 ## 🧪 Training the Model
 
@@ -190,17 +199,21 @@ make train -- --sample-size 2000
 make train-full
 ```
 
-The trained model will be logged to MLflow and registered as `SwipeFlixModel` version 1. View the model in MLflow UI at `http://localhost:5000`.
+The trained model will be logged to MLflow and registered as `SwipeFlixModel` version 1.
+View the model in MLflow UI at `http://localhost:5000`.
 
 ### Model Architecture
 
 **Hybrid Recommender:**
-- **Collaborative Filtering:** TruncatedSVD on user-item rating matrix → user/item embeddings
+
+- **Collaborative Filtering:** TruncatedSVD on user-item rating matrix → user/item
+  embeddings
 - **Content-Based:** TF-IDF on movie plot and genre data
-- **Scoring:** Weighted combination: `score = α * collab_similarity + (1-α) * content_similarity`
+- **Scoring:** Weighted combination:
+  `score = α * collab_similarity + (1-α) * content_similarity`
 - **Output:** Top-K movie recommendations per user
 
----
+______________________________________________________________________
 
 ## 🔌 API Usage
 
@@ -211,6 +224,7 @@ curl http://localhost:8000/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -231,6 +245,7 @@ curl -X POST http://localhost:8000/predict \
 ```
 
 Response:
+
 ```json
 {
   "user_id": "user_1",
@@ -250,7 +265,7 @@ Response:
 curl http://localhost:8000/metrics
 ```
 
----
+______________________________________________________________________
 
 ## 🧪 Testing
 
@@ -267,7 +282,7 @@ pytest --cov=src/swipeflix --cov-report=html
 
 Coverage must be ≥80% for CI to pass.
 
----
+______________________________________________________________________
 
 ## 🔒 Security & Pre-commit Hooks
 
@@ -290,14 +305,18 @@ pip-audit
 # CI fails on CRITICAL vulnerabilities
 ```
 
----
+______________________________________________________________________
 
 ## 🏗️ Infrastructure as Code - Terraform (Bonus #3)
 
 ### Why IaC?
-Infrastructure as Code ensures reproducible, version-controlled infrastructure setup. Our Terraform configuration provisions local development infrastructure that mimics production environments.
+
+Infrastructure as Code ensures reproducible, version-controlled infrastructure setup.
+Our Terraform configuration provisions local development infrastructure that mimics
+production environments.
 
 ### What's Provisioned?
+
 - **MinIO** - S3-compatible object storage for MLflow artifacts
 - **PostgreSQL** - Database backend for MLflow tracking
 - **Docker Network** - Isolated networking for services
@@ -320,12 +339,15 @@ terraform output
 ```
 
 ### Terraform Files
+
 - `infra/terraform/main.tf` - Main configuration (resources, networks, volumes)
 - `infra/terraform/variables.tf` - Input variables with defaults
 - `infra/terraform/README.md` - Detailed usage guide
 
 ### Integration with Docker Compose
-Terraform-managed infrastructure uses the same network as Docker Compose, allowing seamless integration:
+
+Terraform-managed infrastructure uses the same network as Docker Compose, allowing
+seamless integration:
 
 ```bash
 # Option 1: Use Terraform for infrastructure
@@ -336,23 +358,26 @@ docker-compose up app mlflow
 docker-compose --profile dev up
 ```
 
----
+______________________________________________________________________
 
 ## 📊 ML Workflow Monitoring
 
 ### MLflow Model Registry
 
-SwipeFlix uses MLflow for experiment tracking and model versioning. Models are automatically registered during training.
+SwipeFlix uses MLflow for experiment tracking and model versioning. Models are
+automatically registered during training.
 
 **Access MLflow UI:** http://localhost:5000
 
 After running `make train`, you'll see:
+
 - Experiment: `swipeflix-training`
 - Model: `SwipeFlixModel` (version 1)
 - Metrics: train_mse, component sizes
 - Parameters: n_components, weights, sample_size
 
 **Model Registration Code:**
+
 ```python
 # In src/swipeflix/ml/train.py
 mlflow.pyfunc.log_model(
@@ -367,6 +392,7 @@ mlflow.pyfunc.log_model(
 Monitors data distribution changes over time to detect when model retraining is needed.
 
 **Generate Drift Report:**
+
 ```bash
 # Generate drift report from ratings data
 python scripts/generate_drift_report.py
@@ -376,11 +402,13 @@ open monitoring/evidently/drift_report.html
 ```
 
 **Evidently Service (Docker Compose):**
+
 - URL: http://localhost:7000
 - Monitors: Feature drift, data quality, target drift
 - Alerts when drift score > 0.15 (high drift threshold)
 
 **Example Output:**
+
 ```
 Drift Score: 0.08
 ⚡ Moderate drift detected. Monitor closely.
@@ -391,16 +419,20 @@ Drift Score: 0.08
 **Metrics Endpoint:** http://localhost:8000/metrics
 
 **Available Metrics:**
+
 1. **HTTP Metrics:**
+
    - `swipeflix_http_requests_total` - Total API requests by method, endpoint, status
    - `swipeflix_http_request_duration_seconds` - Request latency histogram (p95, p99)
 
-2. **ML Metrics:**
+1. **ML Metrics:**
+
    - `swipeflix_inference_duration_seconds` - Model inference time
    - `swipeflix_model_version_info` - Current model version
    - `swipeflix_predictions_total` - Total predictions made
 
-3. **GPU Metrics** (when GPU available):
+1. **GPU Metrics** (when GPU available):
+
    - `swipeflix_gpu_utilization_percent` - GPU usage percentage
    - `swipeflix_gpu_memory_used_mb` - GPU memory consumption
    - `swipeflix_gpu_temperature_celsius` - GPU temperature
@@ -415,13 +447,15 @@ Drift Score: 0.08
 **Pre-configured Dashboard: "SwipeFlix API Dashboard"**
 
 5 Panels:
+
 1. **Request Rate** - Requests per second by endpoint
-2. **Request Latency** - p95 and p99 latency trends
-3. **Error Rate** - Percentage of 5xx errors (gauge)
-4. **Model Inference Latency** - ML prediction times
-5. **Model Version** - Current deployed model version
+1. **Request Latency** - p95 and p99 latency trends
+1. **Error Rate** - Percentage of 5xx errors (gauge)
+1. **Model Inference Latency** - ML prediction times
+1. **Model Version** - Current deployed model version
 
 **Viewing GPU Metrics in Grafana:**
+
 ```
 Query: swipeflix_gpu_utilization_percent
 ```
@@ -429,61 +463,63 @@ Query: swipeflix_gpu_utilization_percent
 ## 📊 Monitoring (Bonus)
 
 ### Prometheus Metrics
+
 - `swipeflix_request_count` - Total API requests
 - `swipeflix_request_latency_seconds` - Request latency histogram
 - `swipeflix_inference_latency_seconds` - Model inference time
 - `swipeflix_model_version` - Current model version (label)
 
 ### Grafana Dashboards
+
 1. **API Performance:** Request rates, latencies, error rates
-2. **Model Metrics:** Inference times, model version tracking
-3. **System Health:** CPU, memory, disk usage
+1. **Model Metrics:** Inference times, model version tracking
+1. **System Health:** CPU, memory, disk usage
 
 Default credentials: `admin/admin`
 
 ### Screenshots
 
 **MLflow UI - Model Registry:**
-![MLflow Model Registry](docs/screenshots/mlflow-registry.png)
-*Registered SwipeFlixModel v1 with training metrics and parameters*
+![MLflow Model Registry](docs/screenshots/mlflow-registry.png) *Registered
+SwipeFlixModel v1 with training metrics and parameters*
 
-**Grafana Dashboard:**
-![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
+**Grafana Dashboard:** ![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
 *Real-time monitoring of API performance, inference latency, and GPU utilization*
 
 **Evidently Drift Report:**
-![Evidently Drift Detection](docs/screenshots/evidently-drift.png)
-*Data drift monitoring showing distribution changes over time*
+![Evidently Drift Detection](docs/screenshots/evidently-drift.png) *Data drift
+monitoring showing distribution changes over time*
 
 > **Note:** To generate screenshots after setup:
+>
 > 1. Start services: `make compose-up`
-> 2. Train model: `make train`
-> 3. Generate traffic: `python scripts/generate_traffic.py`
-> 4. Generate drift report: `python scripts/generate_drift_report.py`
-> 5. Take screenshots of MLflow UI, Grafana dashboards, and Evidently reports
+> 1. Train model: `make train`
+> 1. Generate traffic: `python scripts/generate_traffic.py`
+> 1. Generate drift report: `python scripts/generate_drift_report.py`
+> 1. Take screenshots of MLflow UI, Grafana dashboards, and Evidently reports
 
----
+______________________________________________________________________
 
 ## 🚢 CI/CD Pipeline
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
 
 1. **Lint** - ruff + black formatting checks
-2. **Test** - pytest with 80% coverage requirement
-3. **Build** - Multi-stage Docker image
-4. **Push** - Tagged image to GitHub Container Registry (GHCR)
-5. **Canary Deploy** - Run container in canary mode
-6. **Acceptance Tests** - 5 golden test queries
-7. **Security Scan** - pip-audit for vulnerabilities
-8. **Load Test** (bonus) - k6 performance tests with SLO assertions
+1. **Test** - pytest with 80% coverage requirement
+1. **Build** - Multi-stage Docker image
+1. **Push** - Tagged image to GitHub Container Registry (GHCR)
+1. **Canary Deploy** - Run container in canary mode
+1. **Acceptance Tests** - 5 golden test queries
+1. **Security Scan** - pip-audit for vulnerabilities
+1. **Load Test** (bonus) - k6 performance tests with SLO assertions
 
 ### Required GitHub Secrets
 
-| Secret | Description |
-|--------|-------------|
-| `CR_PAT` | GitHub Personal Access Token with `write:packages` |
-| `MINIO_ROOT_USER` | MinIO admin username (optional for CI) |
-| `MINIO_ROOT_PASSWORD` | MinIO admin password (optional for CI) |
+| Secret                | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| `CR_PAT`              | GitHub Personal Access Token with `write:packages` |
+| `MINIO_ROOT_USER`     | MinIO admin username (optional for CI)             |
+| `MINIO_ROOT_PASSWORD` | MinIO admin password (optional for CI)             |
 
 ### Tagging for Release
 
@@ -492,7 +528,7 @@ git tag v1.0-milestone1
 git push origin v1.0-milestone1
 ```
 
----
+______________________________________________________________________
 
 ## 🎮 Load Testing with k6 (Bonus #4)
 
@@ -505,11 +541,12 @@ k6 run --vus 10 --duration 30s k6/script.js
 ```
 
 SLO Assertions:
-- p95 latency < 500ms
-- Error rate < 1%
+
+- p95 latency \< 500ms
+- Error rate \< 1%
 - Throughput > 100 req/s
 
----
+______________________________________________________________________
 
 ## 🎨 Docker Compose Profiles (Bonus #1)
 
@@ -518,18 +555,21 @@ SLO Assertions:
 SwipeFlix supports three deployment profiles for different environments:
 
 **1. Development Profile (`dev`)** - Full stack with all monitoring tools:
+
 ```bash
 docker-compose --profile dev up
 # Includes: app, postgres, minio, mlflow, prometheus, grafana, evidently
 ```
 
 **2. Test Profile (`test`)** - Minimal services for CI/CD testing:
+
 ```bash
 docker-compose --profile test up
 # Includes: app, postgres, minio, mlflow (no monitoring overhead)
 ```
 
 **3. Production Profile (`prod`)** - Optimized for production with monitoring:
+
 ```bash
 docker-compose --profile prod up
 # Includes: app, postgres, minio, mlflow, prometheus, grafana (no debug tools)
@@ -559,6 +599,7 @@ docker-compose up postgres minio mlflow
 ### Service Dependencies
 
 Services are configured with proper health checks and dependencies:
+
 - `app` depends on: `mlflow`, `minio`
 - `mlflow` depends on: `postgres`, `minio`
 - `grafana` depends on: `prometheus`
@@ -578,7 +619,7 @@ ENVIRONMENT=test docker-compose --profile test up
 ENVIRONMENT=production DEBUG=false docker-compose --profile prod up
 ```
 
----
+______________________________________________________________________
 
 ## 🖥️ GPU Support (Bonus #2)
 
@@ -598,7 +639,8 @@ docker run --gpus all -p 8000:8000 swipeflix:gpu
 
 1. **Provision GPU-enabled machine** (NVIDIA GPU with drivers installed)
 
-2. **Install Docker with NVIDIA Container Toolkit:**
+1. **Install Docker with NVIDIA Container Toolkit:**
+
 ```bash
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
@@ -608,18 +650,21 @@ sudo systemctl restart docker
 ```
 
 3. **Register self-hosted runner:**
+
    - Go to repo Settings → Actions → Runners → New self-hosted runner
    - Follow instructions to download and configure runner
    - Add label `gpu` to the runner
 
-4. **Verify GPU access:**
+1. **Verify GPU access:**
+
 ```bash
 docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 ```
 
-5. **CI will automatically use GPU runner for `train_gpu` job** (configured in `.github/workflows/ci.yml`)
+5. **CI will automatically use GPU runner for `train_gpu` job** (configured in
+   `.github/workflows/ci.yml`)
 
----
+______________________________________________________________________
 
 ## 📦 Data Version Control with DVC (Bonus #5)
 
@@ -650,17 +695,19 @@ dvc repro
 dvc dag
 ```
 
----
+______________________________________________________________________
 
 ## ☁️ AWS Cloud Integration (D9)
 
-SwipeFlix integrates with **Amazon Web Services (AWS)** using 2 distinct cloud services for production-grade data storage and monitoring.
+SwipeFlix integrates with **Amazon Web Services (AWS)** using 2 distinct cloud services
+for production-grade data storage and monitoring.
 
 ### 🗂️ Service 1: Amazon S3 (Data Storage)
 
 **Purpose:** Centralized, scalable storage for training datasets
 
 **Why S3?**
+
 - Highly available and durable (99.999999999% durability)
 - Cost-effective storage ($0.023/GB/month)
 - Easy data sharing across teams and environments
@@ -668,16 +715,19 @@ SwipeFlix integrates with **Amazon Web Services (AWS)** using 2 distinct cloud s
 - Seamless integration with ML workflows
 
 **What We Store:**
+
 - `movies.csv` - Movie metadata (titles, genres)
 - `ratings.csv` - User-movie ratings data
 
 **Implementation:**
+
 - Bucket: `s3://swipeflix/`
 - Files: `movies.csv`, `ratings.csv`
 - Access: Boto3 Python SDK
 - Location: `src/swipeflix/cloud/aws_utils.py`, `src/swipeflix/ml/data_loader.py`
 
 **Usage:**
+
 ```bash
 # Enable S3 in .env
 USE_AWS_S3=true
@@ -696,6 +746,7 @@ make train
 **Purpose:** Centralized logging and real-time application monitoring
 
 **Why CloudWatch?**
+
 - Real-time log aggregation from distributed systems
 - Custom metrics for ML-specific monitoring
 - Alert capabilities for critical events
@@ -703,36 +754,43 @@ make train
 - Integration with AWS ecosystem
 
 **What We Log:**
+
 1. **Application Events:**
+
    - API startup/shutdown
    - Health check status
    - Configuration loaded
 
-2. **ML Workflow Events:**
+1. **ML Workflow Events:**
+
    - Training started/completed
    - Model version deployed
    - Training metrics (MSE, accuracy)
    - Data loading from S3
 
-3. **Prediction Events:**
+1. **Prediction Events:**
+
    - Prediction requests (user_id, top_k)
    - Inference latency
    - Model version used
    - Request counts
 
 **Implementation:**
+
 - Log Group: `swipeflix-logs`
 - Log Stream: `app`
 - Metrics Namespace: `SwipeFlix`
 - Access: Boto3 CloudWatch Logs & Metrics APIs
 
 **CloudWatch Metrics Sent:**
+
 - `TrainingCompleted` - Training run counter
 - `TrainingMSE` - Model performance metric
 - `PredictionRequests` - API request counter
 - `InferenceLatency` - Prediction response time
 
 **Usage:**
+
 ```bash
 # Enable CloudWatch in .env
 CLOUDWATCH_ENABLED=true
@@ -761,7 +819,7 @@ curl -X POST http://localhost:8000/predict -d '{"user_id":"user_1","top_k":5}'
    └────┬─────┘
         │
         ↓ boto3.client('s3').get_object()
-   
+
 2. TRAINING WORKFLOW:
    ┌─────────────────┐
    │  Training Script │ ← Loads data from S3
@@ -795,23 +853,23 @@ curl -X POST http://localhost:8000/predict -d '{"user_id":"user_1","top_k":5}'
 
 ### 📸 AWS Screenshots (D9 Requirement)
 
-**S3 Bucket with Data Files:**
-![AWS S3 Bucket](docs/screenshots/aws-s3-bucket.png)
-*S3 bucket `swipeflix` showing movies.csv and ratings.csv files*
+**S3 Bucket with Data Files:** ![AWS S3 Bucket](docs/screenshots/aws-s3-bucket.png) *S3
+bucket `swipeflix` showing movies.csv and ratings.csv files*
 
-**CloudWatch Logs:**
-![AWS CloudWatch Logs](docs/screenshots/aws-cloudwatch-logs.png)
+**CloudWatch Logs:** ![AWS CloudWatch Logs](docs/screenshots/aws-cloudwatch-logs.png)
 *CloudWatch log group showing training and prediction events*
 
 **CloudWatch Metrics Dashboard:**
-![AWS CloudWatch Metrics](docs/screenshots/aws-cloudwatch-metrics.png)
-*Custom metrics for training and inference monitoring*
+![AWS CloudWatch Metrics](docs/screenshots/aws-cloudwatch-metrics.png) *Custom metrics
+for training and inference monitoring*
 
-> **Note:** To generate screenshots, set up AWS services following `docs/AWS_SETUP_GUIDE.md`, then:
+> **Note:** To generate screenshots, set up AWS services following
+> `docs/AWS_SETUP_GUIDE.md`, then:
+>
 > 1. Upload data to S3: `aws s3 cp data/ s3://swipeflix/ --recursive`
-> 2. Enable AWS in `.env`: `USE_AWS_S3=true`, `CLOUDWATCH_ENABLED=true`
-> 3. Run training: `make train`
-> 4. Take screenshots from AWS Console
+> 1. Enable AWS in `.env`: `USE_AWS_S3=true`, `CLOUDWATCH_ENABLED=true`
+> 1. Run training: `make train`
+> 1. Take screenshots from AWS Console
 
 ### 🚀 How to Reproduce AWS Setup
 
@@ -857,116 +915,140 @@ aws logs tail swipeflix-logs --follow
 ### 💡 Benefits of Cloud Integration
 
 **S3 Benefits:**
+
 - ✅ No local disk space needed for large datasets
 - ✅ Data available from any environment (local, CI, prod)
 - ✅ Built-in versioning and backup
 - ✅ Team collaboration on datasets
-- ✅ Cost: < $0.10/month for dev datasets
+- ✅ Cost: \< $0.10/month for dev datasets
 
 **CloudWatch Benefits:**
+
 - ✅ Centralized logs from multiple instances
 - ✅ Real-time monitoring of ML workflows
 - ✅ Historical analysis of training metrics
 - ✅ Alerting on failures or performance issues
 - ✅ Integration with AWS ecosystem
-- ✅ Cost: < $1/month for dev workloads
+- ✅ Cost: \< $1/month for dev workloads
 
 ### 🔒 Security Best Practices
 
 1. **IAM Policies:** Use least-privilege access
-2. **Credentials:** Store in environment variables, never in code
-3. **S3 Encryption:** Enable server-side encryption
-4. **CloudWatch:** Set log retention policies (7-30 days)
-5. **Access Logs:** Enable S3 access logging for audit
+1. **Credentials:** Store in environment variables, never in code
+1. **S3 Encryption:** Enable server-side encryption
+1. **CloudWatch:** Set log retention policies (7-30 days)
+1. **Access Logs:** Enable S3 access logging for audit
 
 ### 📊 Cost Estimation (Monthly)
 
-| Service | Usage | Cost |
-|---------|-------|------|
-| S3 Storage | 100 MB data | $0.002 |
-| S3 Requests | 1,000 GET | $0.0004 |
-| CloudWatch Logs | 500 MB ingestion | $0.25 |
-| CloudWatch Metrics | 10 custom metrics | $0.30 |
-| **Total** | | **< $0.60/month** |
+| Service            | Usage             | Cost               |
+| ------------------ | ----------------- | ------------------ |
+| S3 Storage         | 100 MB data       | $0.002             |
+| S3 Requests        | 1,000 GET         | $0.0004            |
+| CloudWatch Logs    | 500 MB ingestion  | $0.25              |
+| CloudWatch Metrics | 10 custom metrics | $0.30              |
+| **Total**          |                   | **\< $0.60/month** |
 
 ### 🎯 D9 Compliance Summary
 
-✅ **Requirement:** Use at least 2 distinct cloud services  
-✅ **Implemented:** Amazon S3 + Amazon CloudWatch
+✅ **Requirement:** Use at least 2 distinct cloud services\
+✅ **Implemented:** Amazon S3
+\+ Amazon CloudWatch
 
-✅ **Screenshots:** Annotated screenshots in README  
-✅ **Documentation:** Which services, why, and how to reproduce  
-✅ **ML Workflow:** Data → S3 → Training → CloudWatch → Inference
+✅ **Screenshots:** Annotated screenshots in README\
+✅ **Documentation:** Which services,
+why, and how to reproduce\
+✅ **ML Workflow:** Data → S3 → Training → CloudWatch →
+Inference
 
 ✅ **Services Integrated:**
+
 1. **Amazon S3** - Data storage for movies.csv and ratings.csv
-2. **Amazon CloudWatch** - Logs and metrics for training and inference
+1. **Amazon CloudWatch** - Logs and metrics for training and inference
 
 ✅ **Production Ready:** Automatic fallback to local if AWS unavailable
 
----
+______________________________________________________________________
 
 ## ☁️ Additional Cloud Deployment Options (Bonus)
 
 For production deployments beyond D9 requirements, see `docs/CLOUD_DEPLOYMENT.md` for:
+
 - AWS EC2 deployment
 - GCP Cloud Run deployment
 - Azure Container Instances deployment
 
----
+______________________________________________________________________
 
 ## ❓ FAQ
 
 ### Q: Build fails with "Module not found"?
-**A:** Ensure you've activated the virtual environment: `source venv/bin/activate` (Linux/Mac) or `.\venv\Scripts\activate` (Windows)
+
+**A:** Ensure you've activated the virtual environment: `source venv/bin/activate`
+(Linux/Mac) or `.\venv\Scripts\activate` (Windows)
 
 ### Q: Docker build is slow?
+
 **A:** Use BuildKit: `DOCKER_BUILDKIT=1 docker build .`
 
 ### Q: MLflow UI shows no experiments?
+
 **A:** Run training first: `make train`
 
 ### Q: Tests fail with "FileNotFoundError: data/movies.csv"?
-**A:** Ensure you're running from project root, and data files exist in `data/` directory
+
+**A:** Ensure you're running from project root, and data files exist in `data/`
+directory
 
 ### Q: Windows: "make: command not found"?
+
 **A:** Install Make for Windows: `choco install make` or use Git Bash / WSL
 
 ### Q: Port 8000 already in use?
-**A:** Change port in `.env` or kill existing process: `lsof -ti:8000 | xargs kill -9` (Mac/Linux) or `netstat -ano | findstr :8000` (Windows)
+
+**A:** Change port in `.env` or kill existing process: `lsof -ti:8000 | xargs kill -9`
+(Mac/Linux) or `netstat -ano | findstr :8000` (Windows)
 
 ### Q: GPU training not working?
-**A:** Verify NVIDIA drivers: `nvidia-smi` and Docker GPU support: `docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi`
+
+**A:** Verify NVIDIA drivers: `nvidia-smi` and Docker GPU support:
+`docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi`
 
 ### Q: CI fails on acceptance tests?
-**A:** Check golden test files in `golden/` match current API schema. Update if API changed.
+
+**A:** Check golden test files in `golden/` match current API schema. Update if API
+changed.
 
 ### Q: How do I update the model in production?
-**A:** 
-1. Train new model version
-2. Register in MLflow with new version tag
-3. Update `MODEL_VERSION` env var in deployment
-4. Restart service: `docker-compose restart app`
 
----
+**A:**
+
+1. Train new model version
+1. Register in MLflow with new version tag
+1. Update `MODEL_VERSION` env var in deployment
+1. Restart service: `docker-compose restart app`
+
+______________________________________________________________________
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for
+details.
 
----
+______________________________________________________________________
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, team member responsibilities, and branch naming conventions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, team member
+responsibilities, and branch naming conventions.
 
----
+______________________________________________________________________
 
 ## 📧 Contact
 
-For questions or issues, please open a GitHub issue or contact the team (see CONTRIBUTING.md).
+For questions or issues, please open a GitHub issue or contact the team (see
+CONTRIBUTING.md).
 
----
+______________________________________________________________________
 
 **Built with ❤️ for MLOps Course - Milestone 1**
-

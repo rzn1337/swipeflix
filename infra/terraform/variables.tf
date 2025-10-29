@@ -54,4 +54,3 @@ variable "postgres_db" {
   type        = string
   default     = "mlflow"
 }
-

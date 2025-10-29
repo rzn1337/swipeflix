@@ -163,4 +163,3 @@ def test_error_response_schema():
 
     assert response.error == "Test error"
     assert response.detail == "Detailed error message"
-

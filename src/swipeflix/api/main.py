@@ -30,19 +30,18 @@ async def lifespan(app: FastAPI):
 
     if settings.canary:
         logger.warning("🐤 Running in CANARY mode")
-    
+
     # Initialize AWS CloudWatch logging
     if settings.cloudwatch_enabled:
         from swipeflix.cloud.aws_utils import aws_manager, log_to_cloudwatch
-        
+
         if aws_manager.is_aws_enabled():
             # Create log group and stream
             aws_manager.create_log_group_if_not_exists(settings.cloudwatch_log_group)
             aws_manager.create_log_stream_if_not_exists(
-                settings.cloudwatch_log_group,
-                settings.cloudwatch_log_stream
+                settings.cloudwatch_log_group, settings.cloudwatch_log_stream
             )
-            
+
             # Send startup log
             startup_message = (
                 f"SwipeFlix API started successfully. "
@@ -50,13 +49,13 @@ async def lifespan(app: FastAPI):
                 f"S3 Integration: {'Enabled' if settings.use_aws_s3 else 'Disabled'}, "
                 f"MLflow: {settings.mlflow_tracking_uri}"
             )
-            
+
             log_to_cloudwatch(
                 startup_message,
                 settings.cloudwatch_log_group,
-                settings.cloudwatch_log_stream
+                settings.cloudwatch_log_stream,
             )
-            
+
             logger.info("CloudWatch logging initialized and startup message sent")
         else:
             logger.warning("CloudWatch enabled but AWS credentials not available")
@@ -66,12 +65,13 @@ async def lifespan(app: FastAPI):
     # Send shutdown log
     if settings.cloudwatch_enabled:
         from swipeflix.cloud.aws_utils import log_to_cloudwatch
+
         log_to_cloudwatch(
             f"SwipeFlix API shutting down. Environment: {settings.environment}",
             settings.cloudwatch_log_group,
-            settings.cloudwatch_log_stream
+            settings.cloudwatch_log_stream,
         )
-    
+
     logger.info("Shutting down application")
 
 
@@ -131,4 +131,3 @@ if __name__ == "__main__":
         workers=settings.api_workers,
         reload=settings.debug,
     )
-

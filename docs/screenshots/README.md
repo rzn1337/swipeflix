@@ -5,9 +5,11 @@ This directory contains screenshots demonstrating the ML monitoring stack.
 ## Required Screenshots
 
 ### 1. MLflow Model Registry
+
 **Filename:** `mlflow-registry.png`
 
 **What to capture:**
+
 - Navigate to: http://localhost:5000
 - Click on "Models" tab
 - Show `SwipeFlixModel` with version 1 registered
@@ -18,18 +20,21 @@ This directory contains screenshots demonstrating the ML monitoring stack.
   - Timestamp
 
 **How to generate:**
+
 ```bash
 make compose-up
 make train
 # Wait 10 seconds, then visit http://localhost:5000
 ```
 
----
+______________________________________________________________________
 
 ### 2. Grafana Dashboard
+
 **Filename:** `grafana-dashboard.png`
 
 **What to capture:**
+
 - Navigate to: http://localhost:3000 (admin/admin)
 - Go to Dashboards → SwipeFlix API Dashboard
 - Should show:
@@ -40,6 +45,7 @@ make train
   - GPU utilization (if GPU available)
 
 **How to generate:**
+
 ```bash
 make compose-up
 # Generate some traffic
@@ -53,12 +59,14 @@ curl -X POST http://localhost:8000/predict \
 # Navigate to SwipeFlix API Dashboard
 ```
 
----
+______________________________________________________________________
 
 ### 3. Evidently Drift Report
+
 **Filename:** `evidently-drift.png`
 
 **What to capture:**
+
 - Run drift detection script
 - Open generated HTML report
 - Should show:
@@ -68,22 +76,25 @@ curl -X POST http://localhost:8000/predict \
   - Warnings/alerts if drift detected
 
 **How to generate:**
+
 ```bash
 python scripts/generate_drift_report.py
 open monitoring/evidently/drift_report.html
 ```
 
----
+______________________________________________________________________
 
 ### 4. Prometheus Metrics (Optional)
+
 **Filename:** `prometheus-metrics.png`
 
 **What to capture:**
+
 - Navigate to: http://localhost:9090
 - Show query: `swipeflix_http_requests_total`
 - Display metrics in table or graph format
 
----
+______________________________________________________________________
 
 ## Quick Screenshot Generation Script
 
@@ -119,24 +130,25 @@ echo "3. Evidently: open monitoring/evidently/drift_report.html"
 echo "4. Prometheus: http://localhost:9090"
 ```
 
----
+______________________________________________________________________
 
 ## Automated Screenshot Capture (Optional)
 
 For automated screenshot capture, use tools like:
 
 ### Puppeteer (Node.js)
+
 ```javascript
 const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  
+
   // MLflow
   await page.goto('http://localhost:5000');
   await page.screenshot({ path: 'docs/screenshots/mlflow-registry.png' });
-  
+
   // Grafana
   await page.goto('http://localhost:3000');
   await page.type('#username', 'admin');
@@ -144,27 +156,28 @@ const puppeteer = require('puppeteer');
   await page.click('button[type="submit"]');
   await page.waitForNavigation();
   await page.screenshot({ path: 'docs/screenshots/grafana-dashboard.png' });
-  
+
   await browser.close();
 })();
 ```
 
 ### Playwright (Python)
+
 ```python
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page()
-    
+
     # MLflow
-    page.goto('http://localhost:5000')
-    page.screenshot(path='docs/screenshots/mlflow-registry.png')
-    
+    page.goto("http://localhost:5000")
+    page.screenshot(path="docs/screenshots/mlflow-registry.png")
+
     browser.close()
 ```
 
----
+______________________________________________________________________
 
 ## Notes
 
@@ -174,11 +187,11 @@ with sync_playwright() as p:
 - Remove any sensitive information before committing
 - Use PNG format for better quality
 
----
+______________________________________________________________________
 
-**Status:** 
+**Status:**
+
 - [ ] mlflow-registry.png
 - [ ] grafana-dashboard.png
 - [ ] evidently-drift.png
 - [ ] prometheus-metrics.png (optional)
-

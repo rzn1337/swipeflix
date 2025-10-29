@@ -47,4 +47,3 @@ prediction_errors_total = Counter(
     "Total number of prediction errors",
     ["error_type"],
 )
-

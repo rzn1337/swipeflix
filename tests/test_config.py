@@ -1,9 +1,5 @@
 """Tests for configuration management."""
 
-import os
-
-import pytest
-
 
 def test_settings_default_values():
     """Test default settings values."""
@@ -52,4 +48,3 @@ def test_settings_paths():
     assert settings.movies_file == "movies.csv"
     assert settings.ratings_file == "ratings.csv"
     assert settings.data_dir.name == "data"
-

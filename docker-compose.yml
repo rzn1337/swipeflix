@@ -10,17 +10,17 @@ services:
       POSTGRES_PASSWORD: mlflow
       POSTGRES_DB: mlflow
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+    - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+    - 5432:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mlflow"]
+      test: [CMD-SHELL, pg_isready -U mlflow]
       interval: 10s
       timeout: 5s
       retries: 5
-    profiles: ["dev", "test", "prod"]
+    profiles: [dev, test, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # MinIO for artifact storage
   minio:
@@ -31,18 +31,18 @@ services:
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
     volumes:
-      - minio_data:/data
+    - minio_data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+    - 9000:9000
+    - 9001:9001
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [CMD, curl, -f, http://localhost:9000/minio/health/live]
       interval: 10s
       timeout: 5s
       retries: 5
-    profiles: ["dev", "test", "prod"]
+    profiles: [dev, test, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # MinIO client to create bucket
   minio-init:
@@ -58,9 +58,9 @@ services:
       mc policy set download myminio/mlflow;
       exit 0;
       "
-    profiles: ["dev", "test", "prod"]
+    profiles: [dev, test, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # MLflow tracking server
   mlflow:
@@ -75,9 +75,9 @@ services:
       minio:
         condition: service_healthy
     environment:
-      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
-      - AWS_ACCESS_KEY_ID=minioadmin
-      - AWS_SECRET_ACCESS_KEY=minioadmin
+    - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+    - AWS_ACCESS_KEY_ID=minioadmin
+    - AWS_SECRET_ACCESS_KEY=minioadmin
     command: >
       mlflow server
       --backend-store-uri postgresql://mlflow:mlflow@postgres:5432/mlflow
@@ -85,77 +85,77 @@ services:
       --host 0.0.0.0
       --port 5000
     ports:
-      - "5000:5000"
+    - 5000:5000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: [CMD, curl, -f, http://localhost:5000/health]
       interval: 10s
       timeout: 5s
       retries: 5
-    profiles: ["dev", "test", "prod"]
+    profiles: [dev, test, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:latest
     container_name: swipeflix-prometheus
     volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+    - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --web.console.libraries=/usr/share/prometheus/console_libraries
+    - --web.console.templates=/usr/share/prometheus/consoles
     ports:
-      - "9090:9090"
+    - 9090:9090
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      test: [CMD, wget, --quiet, --tries=1, --spider, http://localhost:9090/-/healthy]
       interval: 10s
       timeout: 5s
       retries: 5
-    profiles: ["dev", "prod"]
+    profiles: [dev, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # Grafana for dashboards
   grafana:
     image: grafana/grafana:latest
     container_name: swipeflix-grafana
     depends_on:
-      - prometheus
+    - prometheus
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
+    - GF_SECURITY_ADMIN_USER=admin
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+    - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    - grafana_data:/var/lib/grafana
+    - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     ports:
-      - "3000:3000"
+    - 3000:3000
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      test: [CMD-SHELL, curl -f http://localhost:3000/api/health || exit 1]
       interval: 10s
       timeout: 5s
       retries: 5
-    profiles: ["dev", "prod"]
+    profiles: [dev, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # Evidently for data drift monitoring
   evidently:
     image: evidently/evidently-service:latest
     container_name: swipeflix-evidently
     ports:
-      - "7000:8000"
+    - 7000:8000
     volumes:
-      - ./monitoring/evidently:/workspace
+    - ./monitoring/evidently:/workspace
     environment:
-      - EVIDENTLY_WORKSPACE=/workspace
-    profiles: ["dev", "prod"]
+    - EVIDENTLY_WORKSPACE=/workspace
+    profiles: [dev, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
   # SwipeFlix API application
   app:
@@ -169,24 +169,24 @@ services:
       minio:
         condition: service_healthy
     environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - S3_ENDPOINT_URL=http://minio:9000
-      - S3_ACCESS_KEY=minioadmin
-      - S3_SECRET_KEY=minioadmin
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-      - DEBUG=${DEBUG:-false}
-      - CANARY=${CANARY:-false}
+    - MLFLOW_TRACKING_URI=http://mlflow:5000
+    - S3_ENDPOINT_URL=http://minio:9000
+    - S3_ACCESS_KEY=minioadmin
+    - S3_SECRET_KEY=minioadmin
+    - ENVIRONMENT=${ENVIRONMENT:-development}
+    - DEBUG=${DEBUG:-false}
+    - CANARY=${CANARY:-false}
     ports:
-      - "8000:8000"
+    - 8000:8000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [CMD, curl, -f, http://localhost:8000/health]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    profiles: ["dev", "test", "prod"]
+    profiles: [dev, test, prod]
     networks:
-      - swipeflix-network
+    - swipeflix-network
 
 volumes:
   postgres_data:
@@ -197,4 +197,3 @@ volumes:
 networks:
   swipeflix-network:
     driver: bridge
-

@@ -16,8 +16,8 @@ from swipeflix.api.schemas import (
 )
 from swipeflix.config import settings
 from swipeflix.ml.predict import ModelPredictor
+from swipeflix.monitoring.gpu_metrics import update_gpu_metrics
 from swipeflix.monitoring.metrics import inference_duration_seconds, model_version_info
-from swipeflix.monitoring.gpu_metrics import update_gpu_metrics, get_gpu_info
 
 router = APIRouter()
 
@@ -48,7 +48,7 @@ async def health() -> HealthResponse:
     try:
         # Update GPU metrics if available
         update_gpu_metrics()
-        
+
         predictor = get_predictor()
         model_loaded = predictor.is_loaded()
         model_ver = predictor.get_model_version() if model_loaded else None
@@ -141,29 +141,30 @@ async def predict(request: PredictRequest) -> PredictResponse:
             f"Prediction completed for user_id={request.user_id} "
             f"in {inference_time_ms:.2f}ms"
         )
-        
+
         # Log to CloudWatch
         if settings.cloudwatch_enabled:
             from swipeflix.cloud.aws_utils import log_to_cloudwatch, send_metric
+
             log_to_cloudwatch(
                 f"Prediction requested: user_id={request.user_id}, top_k={request.top_k}, "
                 f"inference_time_ms={inference_time_ms:.2f}, model_version={predictor.get_model_version()}",
                 settings.cloudwatch_log_group,
-                settings.cloudwatch_log_stream
+                settings.cloudwatch_log_stream,
             )
-            
+
             # Send metrics to CloudWatch
             send_metric(
                 metric_name="PredictionRequests",
                 value=1,
                 unit="Count",
-                dimensions={"Endpoint": "/predict"}
+                dimensions={"Endpoint": "/predict"},
             )
             send_metric(
                 metric_name="InferenceLatency",
                 value=inference_time_ms,
                 unit="Milliseconds",
-                dimensions={"Model": predictor.get_model_version() or "unknown"}
+                dimensions={"Model": predictor.get_model_version() or "unknown"},
             )
 
         return PredictResponse(
@@ -186,4 +187,3 @@ async def predict(request: PredictRequest) -> PredictResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Prediction failed: {str(e)}",
         )
-

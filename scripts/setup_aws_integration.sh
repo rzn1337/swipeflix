@@ -121,4 +121,3 @@ echo "  - S3: https://console.aws.amazon.com/s3/buckets/$BUCKET_NAME"
 echo "  - CloudWatch: https://console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#logsV2:log-groups/log-group/$LOG_GROUP"
 echo ""
 echo "✅ AWS Integration Ready!"
-

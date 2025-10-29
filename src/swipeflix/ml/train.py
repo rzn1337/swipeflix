@@ -2,14 +2,6 @@
 
 import argparse
 import os
-import sys
-from pathlib import Path
-
-# Configure environment variables for MinIO/S3 BEFORE importing boto3/mlflow
-# This must be done before any boto3 initialization
-os.environ.setdefault("AWS_ACCESS_KEY_ID", "minioadmin")
-os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "minioadmin")
-os.environ.setdefault("MLFLOW_S3_ENDPOINT_URL", "http://localhost:9000")
 
 import mlflow
 import mlflow.pyfunc
@@ -22,6 +14,12 @@ from sklearn.model_selection import train_test_split
 
 from swipeflix.config import settings
 from swipeflix.ml.preprocessing import DataPreprocessor
+
+# Configure environment variables for MinIO/S3 BEFORE importing boto3/mlflow
+# This must be done before any boto3 initialization
+os.environ.setdefault("AWS_ACCESS_KEY_ID", "minioadmin")
+os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "minioadmin")
+os.environ.setdefault("MLFLOW_S3_ENDPOINT_URL", "http://localhost:9000")
 
 
 class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
@@ -41,7 +39,13 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
         self.collab_weight = settings.collab_weight
         self.content_weight = settings.content_weight
 
-    def fit(self, user_item_matrix: pd.DataFrame, movies_df: pd.DataFrame, tfidf_matrix, vectorizer):
+    def fit(
+        self,
+        user_item_matrix: pd.DataFrame,
+        movies_df: pd.DataFrame,
+        tfidf_matrix,
+        vectorizer,
+    ):
         """Train the hybrid model."""
         logger.info("Training hybrid recommender model...")
 
@@ -50,9 +54,15 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
         self.vectorizer = vectorizer
 
         # Create user/item mappings
-        self.user_mapping = {user: idx for idx, user in enumerate(user_item_matrix.index)}
-        self.item_mapping = {item: idx for idx, item in enumerate(user_item_matrix.columns)}
-        self.reverse_item_mapping = {idx: item for item, idx in self.item_mapping.items()}
+        self.user_mapping = {
+            user: idx for idx, user in enumerate(user_item_matrix.index)
+        }
+        self.item_mapping = {
+            item: idx for idx, item in enumerate(user_item_matrix.columns)
+        }
+        self.reverse_item_mapping = {
+            idx: item for item, idx in self.item_mapping.items()
+        }
 
         # Collaborative filtering: SVD
         logger.info("Training collaborative filtering (SVD)...")
@@ -84,7 +94,9 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
         # Get user index
         if user_id not in self.user_mapping:
             # New user - use popularity-based recommendations
-            logger.warning(f"Unknown user {user_id}, using popularity-based recommendations")
+            logger.warning(
+                f"Unknown user {user_id}, using popularity-based recommendations"
+            )
             return self._get_popular_movies(top_k)
 
         user_idx = self.user_mapping[user_id]
@@ -175,19 +187,19 @@ def train_model(sample_size: int = None, seed: int = 42) -> None:
 
     # Load data (from S3 or local)
     logger.info("Loading data...")
-    from swipeflix.ml.data_loader import load_movies_data, load_ratings_data
     from swipeflix.cloud.aws_utils import log_to_cloudwatch
-    
+    from swipeflix.ml.data_loader import load_movies_data, load_ratings_data
+
     movies_df = load_movies_data()
     ratings_df = load_ratings_data()
 
     logger.info(f"Loaded {len(movies_df)} movies and {len(ratings_df)} ratings")
-    
+
     # Log to CloudWatch
     log_to_cloudwatch(
         f"Training started: {len(movies_df)} movies, {len(ratings_df)} ratings, sample_size={sample_size or 'full'}",
         settings.cloudwatch_log_group,
-        settings.cloudwatch_log_stream
+        settings.cloudwatch_log_stream,
     )
 
     # Preprocess
@@ -229,7 +241,15 @@ def train_model(sample_size: int = None, seed: int = 42) -> None:
 
         # Evaluate
         logger.info("Evaluating model...")
-        train_mse = np.mean((train_matrix.values - np.dot(model.user_embeddings[:len(train_matrix)], model.item_embeddings.T)) ** 2)
+        train_mse = np.mean(
+            (
+                train_matrix.values
+                - np.dot(
+                    model.user_embeddings[: len(train_matrix)], model.item_embeddings.T
+                )
+            )
+            ** 2
+        )
         mlflow.log_metric("train_mse", train_mse)
 
         # Log model
@@ -242,27 +262,28 @@ def train_model(sample_size: int = None, seed: int = 42) -> None:
 
         logger.info(f"Model logged with run_id: {run.info.run_id}")
         logger.info(f"Model registered as: {settings.model_name}")
-        
+
         # Log to CloudWatch
         from swipeflix.cloud.aws_utils import log_to_cloudwatch, send_metric
+
         log_to_cloudwatch(
             f"Training completed successfully! Model: {settings.model_name}, Run ID: {run.info.run_id}, MSE: {train_mse:.4f}",
             settings.cloudwatch_log_group,
-            settings.cloudwatch_log_stream
+            settings.cloudwatch_log_stream,
         )
-        
+
         # Send metric to CloudWatch
         send_metric(
             metric_name="TrainingCompleted",
             value=1,
             unit="Count",
-            dimensions={"Model": settings.model_name}
+            dimensions={"Model": settings.model_name},
         )
         send_metric(
             metric_name="TrainingMSE",
             value=train_mse,
             unit="None",
-            dimensions={"Model": settings.model_name}
+            dimensions={"Model": settings.model_name},
         )
 
     logger.info("Training completed successfully!")
@@ -292,4 +313,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

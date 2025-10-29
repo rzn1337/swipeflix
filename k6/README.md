@@ -7,11 +7,13 @@ Load tests for the SwipeFlix API using [k6](https://k6.io/).
 Install k6:
 
 ### macOS
+
 ```bash
 brew install k6
 ```
 
 ### Linux
+
 ```bash
 sudo gpg -k
 sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
@@ -21,6 +23,7 @@ sudo apt-get install k6
 ```
 
 ### Windows
+
 ```bash
 choco install k6
 ```
@@ -44,21 +47,25 @@ API_URL=http://localhost:8000 k6 run k6/script.js
 ### Different Load Profiles
 
 #### Smoke Test (2 users)
+
 ```bash
 k6 run --vus 2 --duration 30s k6/script.js
 ```
 
 #### Load Test (10 users, 2 minutes)
+
 ```bash
 k6 run --vus 10 --duration 2m k6/script.js
 ```
 
 #### Stress Test (50 users, 5 minutes)
+
 ```bash
 k6 run --vus 50 --duration 5m k6/script.js
 ```
 
 #### Spike Test
+
 ```bash
 k6 run --stage 10s:1,1m:100,10s:1 k6/script.js
 ```
@@ -68,30 +75,33 @@ k6 run --stage 10s:1,1m:100,10s:1 k6/script.js
 The default test has the following stages:
 
 1. **Ramp-up**: 30s to reach 10 users
-2. **Steady**: 1 min at 10 users
-3. **Ramp-up**: 30s to reach 20 users
-4. **Steady**: 1 min at 20 users
-5. **Ramp-down**: 30s back to 0 users
+1. **Steady**: 1 min at 10 users
+1. **Ramp-up**: 30s to reach 20 users
+1. **Steady**: 1 min at 20 users
+1. **Ramp-down**: 30s back to 0 users
 
 ## SLO Thresholds
 
 The test enforces these Service Level Objectives:
 
-- **p95 latency** < 500ms
-- **Error rate** < 1%
-- **HTTP failure rate** < 5%
+- **p95 latency** \< 500ms
+- **Error rate** \< 1%
+- **HTTP failure rate** \< 5%
 
 ## Test Scenarios
 
 ### 1. Health Check (10% of traffic)
+
 - `GET /health`
 - Validates service health
 
 ### 2. Metadata (5% of traffic)
+
 - `GET /metadata`
 - Validates service metadata
 
 ### 3. Predictions (85% of traffic)
+
 - `POST /predict`
 - Main workload: user recommendations
 - Random user IDs and top_k values
@@ -148,6 +158,7 @@ The CI pipeline includes load testing for tagged releases:
 ### Connection Refused
 
 Ensure the API is running:
+
 ```bash
 curl http://localhost:8000/health
 ```
@@ -155,6 +166,7 @@ curl http://localhost:8000/health
 ### Timeout Errors
 
 Increase think time or reduce virtual users:
+
 ```bash
 k6 run --vus 5 k6/script.js
 ```
@@ -162,6 +174,7 @@ k6 run --vus 5 k6/script.js
 ### Certificate Errors (HTTPS)
 
 Skip TLS verification (test only):
+
 ```bash
 k6 run --insecure-skip-tls-verify k6/script.js
 ```
@@ -202,15 +215,14 @@ k6 run --execution-segment "3/4:1" k6/script.js  # Machine 4
 ## Best Practices
 
 1. **Start small**: Begin with smoke tests, gradually increase load
-2. **Monitor backend**: Watch CPU, memory, database during tests
-3. **Baseline first**: Run tests on stable version before changes
-4. **Realistic scenarios**: Use production-like data and patterns
-5. **Think time**: Add realistic delays between requests
-6. **Ramp-up/down**: Gradually increase/decrease load
+1. **Monitor backend**: Watch CPU, memory, database during tests
+1. **Baseline first**: Run tests on stable version before changes
+1. **Realistic scenarios**: Use production-like data and patterns
+1. **Think time**: Add realistic delays between requests
+1. **Ramp-up/down**: Gradually increase/decrease load
 
 ## References
 
 - [k6 Documentation](https://k6.io/docs/)
 - [k6 Test Types](https://k6.io/docs/test-types/introduction/)
 - [k6 Metrics](https://k6.io/docs/using-k6/metrics/)
-

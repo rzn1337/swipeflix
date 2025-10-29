@@ -158,4 +158,3 @@ clean-all: clean ## Clean everything including venv and Docker
 	@echo "${YELLOW}Stopping Docker containers...${RESET}"
 	docker-compose down -v 2>/dev/null || true
 	@echo "${GREEN}Complete cleanup done!${RESET}"
-

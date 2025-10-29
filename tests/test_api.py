@@ -122,7 +122,10 @@ def test_cors_headers(test_client):
     """Test CORS headers are present."""
     response = test_client.options("/health")
     # CORS should allow the request
-    assert response.status_code in [status.HTTP_200_OK, status.HTTP_405_METHOD_NOT_ALLOWED]
+    assert response.status_code in [
+        status.HTTP_200_OK,
+        status.HTTP_405_METHOD_NOT_ALLOWED,
+    ]
 
 
 def test_openapi_docs(test_client):
@@ -156,4 +159,3 @@ def test_predict_various_inputs(test_client, mock_predictor, user_id, top_k):
     data = response.json()
     assert data["user_id"] == user_id
     assert len(data["recommendations"]) <= top_k
-

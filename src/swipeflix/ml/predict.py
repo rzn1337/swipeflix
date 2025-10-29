@@ -38,7 +38,9 @@ class ModelPredictor:
             self.model_version = settings.model_version
             self._loaded = True
 
-            logger.info(f"Model loaded successfully: {settings.model_name} v{self.model_version}")
+            logger.info(
+                f"Model loaded successfully: {settings.model_name} v{self.model_version}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to load model: {str(e)}")
@@ -90,4 +92,3 @@ class ModelPredictor:
     def get_model_version(self) -> Optional[str]:
         """Get current model version."""
         return self.model_version
-

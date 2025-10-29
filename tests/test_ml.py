@@ -1,8 +1,6 @@
 """Tests for ML training and prediction modules."""
 
-import numpy as np
 import pandas as pd
-import pytest
 
 from swipeflix.ml.preprocessing import DataPreprocessor
 
@@ -201,4 +199,3 @@ def test_data_cleaning_handles_missing_values():
     assert not ratings["userId"].isna().any()
     assert not ratings["movieId"].isna().any()
     assert not ratings["rating"].isna().any()
-

@@ -130,4 +130,3 @@ def cleanup_mlflow():
     test_db = Path("test_mlflow.db")
     if test_db.exists():
         test_db.unlink()
-

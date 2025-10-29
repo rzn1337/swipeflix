@@ -1,14 +1,9 @@
 """Data preprocessing utilities."""
 
-import os
-from pathlib import Path
 
 import pandas as pd
 from loguru import logger
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-from swipeflix.cloud.aws_utils import aws_manager
-from swipeflix.config import settings
 
 
 class DataPreprocessor:
@@ -31,7 +26,9 @@ class DataPreprocessor:
 
         # Handle missing values
         self.movies_df = self.movies_df.dropna(subset=["id", "title"])
-        self.ratings_df = self.ratings_df.dropna(subset=["user_id", "movie_id", "rating"])
+        self.ratings_df = self.ratings_df.dropna(
+            subset=["user_id", "movie_id", "rating"]
+        )
 
         # Ensure proper data types
         self.movies_df["id"] = self.movies_df["id"].astype(str)
@@ -104,4 +101,3 @@ class DataPreprocessor:
         )
 
         return self.movies_df, self.ratings_df
-

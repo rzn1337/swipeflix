@@ -1,6 +1,5 @@
 """Configuration management for SwipeFlix."""
 
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -50,7 +49,7 @@ class Settings(BaseSettings):
     s3_access_key: Optional[str] = "minioadmin"
     s3_secret_key: Optional[str] = "minioadmin"
     s3_bucket: str = "mlflow"
-    
+
     # AWS Integration (D9 - Cloud Integration)
     use_aws_s3: bool = False  # Set to True to use AWS S3 instead of local files
     aws_s3_bucket: str = "swipeflix"  # AWS S3 bucket for data storage
@@ -74,4 +73,3 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
-

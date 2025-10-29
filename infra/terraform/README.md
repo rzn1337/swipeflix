@@ -1,6 +1,7 @@
 # SwipeFlix Terraform Infrastructure
 
-This Terraform configuration provisions local infrastructure for SwipeFlix using Docker containers.
+This Terraform configuration provisions local infrastructure for SwipeFlix using Docker
+containers.
 
 ## Components
 
@@ -11,6 +12,7 @@ This Terraform configuration provisions local infrastructure for SwipeFlix using
 ## Prerequisites
 
 1. **Terraform** >= 1.0
+
    ```bash
    # macOS
    brew install terraform
@@ -21,7 +23,7 @@ This Terraform configuration provisions local infrastructure for SwipeFlix using
    sudo mv terraform /usr/local/bin/
    ```
 
-2. **Docker** running locally
+1. **Docker** running locally
 
 ## Quick Start
 
@@ -57,6 +59,7 @@ terraform output
 ```
 
 Example output:
+
 ```
 minio_console_url = "http://localhost:9001"
 minio_endpoint = "http://localhost:9000"
@@ -65,6 +68,7 @@ postgres_connection_string = <sensitive>
 ```
 
 To view sensitive outputs:
+
 ```bash
 terraform output -json | jq .
 ```
@@ -84,6 +88,7 @@ postgres_db         = "mlflow"
 ```
 
 Then apply:
+
 ```bash
 terraform apply
 ```
@@ -99,15 +104,18 @@ terraform apply
 ## Accessing Services
 
 ### MinIO Console
+
 - URL: http://localhost:9001
 - Username: `minioadmin` (or your custom value)
 - Password: `minioadmin` (or your custom value)
 
 ### MinIO API
+
 - Endpoint: http://localhost:9000
 - Use with AWS CLI or boto3
 
 ### PostgreSQL
+
 - Host: localhost
 - Port: 5432
 - Database: mlflow
@@ -116,7 +124,8 @@ terraform apply
 
 ## Integration with Docker Compose
 
-The Terraform-managed containers use the same network name as Docker Compose, allowing seamless integration:
+The Terraform-managed containers use the same network name as Docker Compose, allowing
+seamless integration:
 
 ```bash
 # Start Terraform infrastructure
@@ -137,6 +146,7 @@ terraform destroy
 ```
 
 Or for non-interactive mode:
+
 ```bash
 terraform destroy -auto-approve
 ```
@@ -253,4 +263,3 @@ GitHub Actions example:
 ## Support
 
 For issues or questions, see the main [README](../../README.md) or open a GitHub issue.
-

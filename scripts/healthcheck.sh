@@ -24,4 +24,3 @@ else
     echo "Health check failed: service not healthy"
     exit 1
 fi
-
