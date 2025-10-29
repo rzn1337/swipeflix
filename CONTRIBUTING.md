@@ -7,18 +7,18 @@ ______________________________________________________________________
 
 ## 👥 Team Members
 
-| Name                | Student ID | Email                         | GitHub Handle |
-| ------------------- | ---------- | ----------------------------- | ------------- |
-| \[Syed Ali Rizwan\] | 26906      | s.rizwan.26906@khi.iba.edu.pk | @username1    |
-| \[Syed Hamza Asif\] | 26975      | s.asif.26975@khi.iba.edu.pk   | @username2    |
-| \[Umaima Raheel\]   | ERP-XXXXX  | student3@example.edu          | @username3    |
-| \[Sana Arshad\]     | ERP-XXXXX  | student4@example.edu          | @username4    |
+| Name                | Student ID | Email                         |
+| ------------------- | ---------- | ----------------------------- |
+| \[Syed Ali Rizwan\] | 26906      | s.rizwan.26906@khi.iba.edu.pk |
+| \[Syed Hamza Asif\] | 26975      | s.asif.26975@khi.iba.edu.pk   |
+| \[Umaima Raheel\]   | ERP-XXXXX  | student3@example.edu          |
+| \[Sana Arshad\]     | ERP-XXXXX  | student4@example.edu          |
 
 ______________________________________________________________________
 
 ## 📋 Task Distribution
 
-### Member 1: \[Name\] - Data Engineering & ML Pipeline
+### Member 1: Data Engineering & ML Pipeline
 
 **Responsibilities:**
 
@@ -38,7 +38,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Member 2: \[Name\] - API Development & Service Layer
+### Member 2: API Development & Service Layer
 
 **Responsibilities:**
 
@@ -58,7 +58,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Member 3: \[Name\] - DevOps & CI/CD
+### Member 3: DevOps & CI/CD
 
 **Responsibilities:**
 
@@ -81,7 +81,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-### Member 4: \[Name\] - Monitoring & Infrastructure
+### Member 4: Monitoring & Infrastructure
 
 **Responsibilities:**
 
@@ -123,146 +123,6 @@ We follow a structured branch naming convention to keep the repository organized
 | `perf/`     | Performance improvements  | `perf/optimize-inference-pipeline` |
 | `hotfix/`   | Critical production fixes | `hotfix/memory-leak`               |
 
-### Branch Naming Examples
-
-```bash
-# Good branch names
-feat/hybrid-recommender-model
-fix/mlflow-connection-error
-docs/add-cloud-deployment-guide
-infra/setup-minio-terraform
-ci/add-load-testing-job
-
-# Bad branch names
-new-feature
-fix
-update
-john-working-branch
-```
-
-### Workflow
-
-1. **Create branch from main:**
-
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feat/your-feature-name
-   ```
-
-1. **Make commits with descriptive messages:**
-
-   ```bash
-   git add .
-   git commit -m "feat: add user-based collaborative filtering"
-   ```
-
-1. **Push and create Pull Request:**
-
-   ```bash
-   git push origin feat/your-feature-name
-   ```
-
-1. **PR must pass all CI checks before merge**
-
-______________________________________________________________________
-
-## 📝 Commit Message Convention
-
-We follow the Conventional Commits specification:
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-### Types
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, no logic change)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-- `ci`: CI/CD changes
-- `perf`: Performance improvements
-
-### Examples
-
-```bash
-feat(api): add /predict endpoint with batch support
-
-Implemented batch prediction endpoint that accepts multiple user IDs
-and returns recommendations for all users in a single request.
-
-Closes #123
-
----
-
-fix(ml): resolve memory leak in model training
-
-Training pipeline was not releasing memory after each epoch.
-Added explicit garbage collection and tensor cleanup.
-
-Fixes #456
-
----
-
-docs(readme): update quick start instructions
-
-Added Windows-specific setup steps and common troubleshooting
-tips for Docker Compose.
-```
-
-______________________________________________________________________
-
-## 🔄 Pull Request Process
-
-1. **Ensure your PR:**
-
-   - Has a descriptive title and description
-   - References related issues (e.g., "Closes #123")
-   - Passes all CI checks (lint, test, build)
-   - Has test coverage ≥80%
-   - Updates documentation if needed
-
-1. **PR Template:**
-
-   ```markdown
-   ## Description
-   Brief description of changes
-
-   ## Type of Change
-   - [ ] Bug fix
-   - [ ] New feature
-   - [ ] Breaking change
-   - [ ] Documentation update
-
-   ## Testing
-   - [ ] Unit tests added/updated
-   - [ ] Integration tests added/updated
-   - [ ] Manual testing completed
-
-   ## Checklist
-   - [ ] Code follows style guidelines
-   - [ ] Self-review completed
-   - [ ] Comments added for complex logic
-   - [ ] Documentation updated
-   - [ ] No new warnings generated
-   - [ ] Tests pass locally
-   ```
-
-1. **Review Process:**
-
-   - At least 1 approval required
-   - All CI checks must pass
-   - No merge conflicts
-   - Squash and merge preferred for feature branches
-
 ______________________________________________________________________
 
 ## 🧪 Testing Guidelines
@@ -300,43 +160,6 @@ def test_predict_endpoint_returns_recommendations():
     assert "recommendations" in data
     assert len(data["recommendations"]) == 5
 ```
-
-______________________________________________________________________
-
-## 🎨 Code Style
-
-### Python Style Guide
-
-- **Formatter:** Black (line length 88)
-- **Linter:** Ruff
-- **Type hints:** Encouraged for public APIs
-- **Docstrings:** Google style
-
-```python
-def predict_for_user(user_id: str, top_k: int = 10) -> list[dict]:
-    """Get top-K movie recommendations for a user.
-
-    Args:
-        user_id: User identifier
-        top_k: Number of recommendations to return
-
-    Returns:
-        List of recommendation dictionaries with movie_id, title, and score
-
-    Raises:
-        ValueError: If user_id is not found
-    """
-    pass
-```
-
-### Pre-commit Hooks
-
-Run before every commit:
-
-```bash
-make precommit
-```
-
 ______________________________________________________________________
 
 ## 🐛 Reporting Issues

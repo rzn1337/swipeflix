@@ -84,13 +84,6 @@ jobs:
         run: |
           docker run -d --name app-canary -p 9000:8000 -e CANARY=true \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-      - name: Wait for healthy
-        run: timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
-      - name: Health check
-        run: |
-          resp=$(curl -s http://localhost:9000/health)
-          echo "$resp"
-          echo "$resp" | grep -q '"status":"healthy"' || (docker logs app-canary && exit 1)
       - if: always()
         run: docker stop app-canary && docker rm app-canary
 

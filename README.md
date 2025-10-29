@@ -14,59 +14,7 @@ ______________________________________________________________________
 
 ## 📐 Architecture
 
-```mermaid
-graph TB
-    subgraph "Data Layer"
-        CSV[CSV Files: movies.csv, ratings.csv]
-        MinIO[MinIO Object Storage]
-        DVC[DVC Data Versioning]
-    end
-
-    subgraph "Training Pipeline"
-        Train[Training Script]
-        MLflow[MLflow Tracking Server]
-        Registry[Model Registry]
-    end
-
-    subgraph "Inference API"
-        FastAPI[FastAPI Service]
-        Model[Loaded PyFunc Model]
-        Health[/health endpoint]
-        Predict[/predict endpoint]
-        Metrics[/metrics endpoint]
-    end
-
-    subgraph "Monitoring Stack"
-        Prometheus[Prometheus]
-        Grafana[Grafana Dashboards]
-        Evidently[Evidently Data Drift]
-    end
-
-    subgraph "CI/CD"
-        GHA[GitHub Actions]
-        GHCR[GitHub Container Registry]
-        Tests[Pytest + Coverage]
-        K6[k6 Load Tests]
-    end
-
-    CSV --> DVC
-    DVC --> MinIO
-    CSV --> Train
-    Train --> MLflow
-    MLflow --> Registry
-    Registry --> Model
-    Model --> FastAPI
-    FastAPI --> Health
-    FastAPI --> Predict
-    FastAPI --> Metrics
-    Metrics --> Prometheus
-    Prometheus --> Grafana
-    FastAPI --> Evidently
-    GHA --> Tests
-    GHA --> K6
-    GHA --> GHCR
-    GHCR --> FastAPI
-```
+![System Architecture](architecture.png)
 
 ______________________________________________________________________
 
@@ -119,7 +67,7 @@ ______________________________________________________________________
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - Docker & Docker Compose
 - Make
 - Git
@@ -128,7 +76,7 @@ ______________________________________________________________________
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/swipeflix.git
+git clone https://github.com/rzn1337/swipeflix.git
 cd swipeflix
 
 # Setup local development environment
@@ -442,61 +390,13 @@ Drift Score: 0.08
 
 ### Grafana Dashboards
 
-**Access:** http://localhost:3000 (default: admin/admin)
-
-**Pre-configured Dashboard: "SwipeFlix API Dashboard"**
-
-5 Panels:
-
-1. **Request Rate** - Requests per second by endpoint
-1. **Request Latency** - p95 and p99 latency trends
-1. **Error Rate** - Percentage of 5xx errors (gauge)
-1. **Model Inference Latency** - ML prediction times
-1. **Model Version** - Current deployed model version
-
-**Viewing GPU Metrics in Grafana:**
-
-```
-Query: swipeflix_gpu_utilization_percent
-```
-
-## 📊 Monitoring (Bonus)
-
-### Prometheus Metrics
-
-- `swipeflix_request_count` - Total API requests
-- `swipeflix_request_latency_seconds` - Request latency histogram
-- `swipeflix_inference_latency_seconds` - Model inference time
-- `swipeflix_model_version` - Current model version (label)
-
-### Grafana Dashboards
-
-1. **API Performance:** Request rates, latencies, error rates
-1. **Model Metrics:** Inference times, model version tracking
-1. **System Health:** CPU, memory, disk usage
-
-Default credentials: `admin/admin`
-
-### Screenshots
-
-**MLflow UI - Model Registry:**
-![MLflow Model Registry](docs/screenshots/mlflow-registry.png) *Registered
-SwipeFlixModel v1 with training metrics and parameters*
-
-**Grafana Dashboard:** ![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
+**Grafana Dashboard:**  
+![Grafana Dashboard](grafana.png)  
 *Real-time monitoring of API performance, inference latency, and GPU utilization*
 
-**Evidently Drift Report:**
-![Evidently Drift Detection](docs/screenshots/evidently-drift.png) *Data drift
-monitoring showing distribution changes over time*
-
-> **Note:** To generate screenshots after setup:
->
-> 1. Start services: `make compose-up`
-> 1. Train model: `make train`
-> 1. Generate traffic: `python scripts/generate_traffic.py`
-> 1. Generate drift report: `python scripts/generate_drift_report.py`
-> 1. Take screenshots of MLflow UI, Grafana dashboards, and Evidently reports
+**Evidently Drift Report:**  
+[View Evidently Drift Report](monitoring/evidently/drift_report.html)  
+*Data drift monitoring showing distribution changes over time*
 
 ______________________________________________________________________
 
@@ -814,8 +714,8 @@ curl -X POST http://localhost:8000/predict -d '{"user_id":"user_1","top_k":5}'
 
 1. DATA STORAGE (S3):
    ┌──────────┐
-   │   S3     │  movies.csv (10 MB)
-   │  Bucket  │  ratings.csv (50 MB)
+   │   S3     │ 
+   │  Bucket  │  
    └────┬─────┘
         │
         ↓ boto3.client('s3').get_object()
@@ -850,26 +750,6 @@ curl -X POST http://localhost:8000/predict -d '{"user_id":"user_1","top_k":5}'
    ├─→ Set Alarms: Alert on high latency or errors
    └─→ Log Insights: Query and analyze logs
 ```
-
-### 📸 AWS Screenshots (D9 Requirement)
-
-**S3 Bucket with Data Files:** ![AWS S3 Bucket](docs/screenshots/aws-s3-bucket.png) *S3
-bucket `swipeflix` showing movies.csv and ratings.csv files*
-
-**CloudWatch Logs:** ![AWS CloudWatch Logs](docs/screenshots/aws-cloudwatch-logs.png)
-*CloudWatch log group showing training and prediction events*
-
-**CloudWatch Metrics Dashboard:**
-![AWS CloudWatch Metrics](docs/screenshots/aws-cloudwatch-metrics.png) *Custom metrics
-for training and inference monitoring*
-
-> **Note:** To generate screenshots, set up AWS services following
-> `docs/AWS_SETUP_GUIDE.md`, then:
->
-> 1. Upload data to S3: `aws s3 cp data/ s3://swipeflix/ --recursive`
-> 1. Enable AWS in `.env`: `USE_AWS_S3=true`, `CLOUDWATCH_ENABLED=true`
-> 1. Run training: `make train`
-> 1. Take screenshots from AWS Console
 
 ### 🚀 How to Reproduce AWS Setup
 
@@ -939,16 +819,6 @@ aws logs tail swipeflix-logs --follow
 1. **CloudWatch:** Set log retention policies (7-30 days)
 1. **Access Logs:** Enable S3 access logging for audit
 
-### 📊 Cost Estimation (Monthly)
-
-| Service            | Usage             | Cost               |
-| ------------------ | ----------------- | ------------------ |
-| S3 Storage         | 100 MB data       | $0.002             |
-| S3 Requests        | 1,000 GET         | $0.0004            |
-| CloudWatch Logs    | 500 MB ingestion  | $0.25              |
-| CloudWatch Metrics | 10 custom metrics | $0.30              |
-| **Total**          |                   | **\< $0.60/month** |
-
 ### 🎯 D9 Compliance Summary
 
 ✅ **Requirement:** Use at least 2 distinct cloud services\
@@ -967,16 +837,6 @@ Inference
 1. **Amazon CloudWatch** - Logs and metrics for training and inference
 
 ✅ **Production Ready:** Automatic fallback to local if AWS unavailable
-
-______________________________________________________________________
-
-## ☁️ Additional Cloud Deployment Options (Bonus)
-
-For production deployments beyond D9 requirements, see `docs/CLOUD_DEPLOYMENT.md` for:
-
-- AWS EC2 deployment
-- GCP Cloud Run deployment
-- Azure Container Instances deployment
 
 ______________________________________________________________________
 
@@ -1048,7 +908,3 @@ ______________________________________________________________________
 
 For questions or issues, please open a GitHub issue or contact the team (see
 CONTRIBUTING.md).
-
-______________________________________________________________________
-
-**Built with ❤️ for MLOps Course - Milestone 1**
