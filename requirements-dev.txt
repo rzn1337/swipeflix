@@ -1,0 +1,41 @@
+# Include production requirements
+-r requirements.txt
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+pytest-mock==3.12.0
+httpx==0.25.2
+
+# Code Quality
+black==23.12.1
+ruff==0.1.9
+isort==5.13.2
+mypy==1.7.1
+
+# Pre-commit
+pre-commit==3.6.0
+
+# Security
+pip-audit==2.6.1
+detect-secrets==1.4.0
+
+# Development
+ipython==8.18.1
+jupyter==1.0.0
+notebook==7.0.6
+
+# Type stubs
+types-requests==2.31.0.10
+types-PyYAML==6.0.12.12
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.5.2
+
+# Load Testing
+k6>=0.48.0  # Note: This is a binary dependency, install separately
+
+# Additional Development Tools
+faker==23.0.0  # For generating test data

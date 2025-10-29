@@ -1,0 +1,13 @@
+[core]
+    remote = minio
+    autostage = true
+
+['remote "minio"']
+    url = s3://mlflow/dvc-storage
+    endpointurl = http://localhost:9000
+    access_key_id = minioadmin
+    secret_access_key = minioadmin
+
+['remote "local"']
+    url = /tmp/dvc-storage
+

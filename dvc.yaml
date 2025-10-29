@@ -1,0 +1,36 @@
+stages:
+  prepare:
+    cmd: python -m src.swipeflix.ml.preprocessing
+    deps:
+      - data/movies.csv
+      - data/ratings.csv
+    outs:
+      - data/processed/
+
+  train:
+    cmd: python -m src.swipeflix.ml.train --seed 42
+    deps:
+      - data/movies.csv
+      - data/ratings.csv
+      - src/swipeflix/ml/train.py
+    params:
+      - swipeflix.config:random_seed
+      - swipeflix.config:n_components
+      - swipeflix.config:content_weight
+      - swipeflix.config:collab_weight
+    metrics:
+      - mlruns/metrics.json:
+          cache: false
+    outs:
+      - mlruns/:
+          cache: false
+
+  evaluate:
+    cmd: python -m src.swipeflix.ml.evaluate
+    deps:
+      - mlruns/
+      - data/ratings.csv
+    metrics:
+      - metrics/evaluation.json:
+          cache: false
+

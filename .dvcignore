@@ -1,0 +1,40 @@
+# Add patterns of files dvc should ignore, which could improve
+# the performance. Learn more at
+# https://dvc.org/doc/user-guide/dvcignore
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+*.pyc
+.pytest_cache
+.coverage
+htmlcov
+
+# IDEs
+.vscode
+.idea
+*.swp
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Logs
+*.log
+logs/
+
+# Temporary
+*.tmp
+tmp/
+
