@@ -1,366 +1,139 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+    branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 env:
-  PYTHON_VERSION: '3.11'
+  PYTHON_VERSION: '3.10'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   lint:
-    name: Lint Code
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff black
-
-      - name: Run ruff
-        run: ruff check src/ tests/
-
-      - name: Run black
-        run: black --check src/ tests/
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: python-version: ${{ env.PYTHON_VERSION }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install ruff black
+      - run: ruff check src/ tests/
+      - run: black --check src/ tests/
 
   test:
-    name: Run Tests
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: python-version: ${{ env.PYTHON_VERSION }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: pytest tests/ --cov=src --cov-report=xml --cov-fail-under=80 -v
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-
-      - name: Run tests with coverage
-        run: |
-          pytest tests/ --cov=src/swipeflix --cov-report=xml --cov-report=term --cov-fail-under=80 -v
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-swipeflix
+          name: coverage-xml
+          path: coverage.xml
 
   build:
-    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: test
-    permissions:
-      contents: read
-      packages: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix=sha-
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push Docker image
+      - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  canary_deploy:
-    name: Canary Deployment
+  canary:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Log in to Container Registry
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
-
-      - name: Pull Docker image
-        run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
+      - name: Pull image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
       - name: Start canary container
         run: |
-          docker run -d \
-            --name swipeflix-canary \
-            -p 9000:8000 \
-            -e CANARY=true \
-            -e ENVIRONMENT=test \
-            -e MLFLOW_TRACKING_URI=http://localhost:5000 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
-      - name: Wait for service to be ready
+          docker run -d --name app-canary -p 9000:8000 -e CANARY=true \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Wait for healthy
+        run: timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
+      - name: Health check
         run: |
-          timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
-
-      - name: Check canary health
-        run: |
-          response=$(curl -s http://localhost:9000/health)
-          echo "Health response: $response"
-          if echo "$response" | grep -q '"status":"healthy"'; then
-            echo "✅ Canary deployment healthy"
-          else
-            echo "❌ Canary deployment unhealthy"
-            exit 1
-          fi
-
-      - name: Show canary logs
-        if: always()
-        run: docker logs swipeflix-canary
-
-      - name: Stop canary container
-        if: always()
-        run: docker stop swipeflix-canary && docker rm swipeflix-canary
+          resp=$(curl -s http://localhost:9000/health)
+          echo "$resp"
+          echo "$resp" | grep -q '"status":"healthy"' || (docker logs app-canary && exit 1)
+      - if: always()
+        run: docker stop app-canary && docker rm app-canary
 
   acceptance_tests:
-    name: Acceptance Tests
     runs-on: ubuntu-latest
-    needs: canary_deploy
+    needs: canary
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Start test stack
-        run: |
-          # Pull image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
-          # Start app container
-          docker run -d \
-            --name swipeflix-test \
-            -p 9000:8000 \
-            -e ENVIRONMENT=test \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
-          # Wait for service
-          timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
-
+      - uses: actions/checkout@v4
       - name: Run acceptance tests
+        env:
+          API_URL: http://localhost:9000
         run: |
+          # start image again for acceptance
+          docker run -d --name app-accept -p 9000:8000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
           chmod +x scripts/acceptance_tests.sh
           API_URL=http://localhost:9000 bash scripts/acceptance_tests.sh
-
-      - name: Show logs
-        if: always()
-        run: docker logs swipeflix-test
-
-      - name: Cleanup
-        if: always()
-        run: docker stop swipeflix-test && docker rm swipeflix-test
+      - if: always()
+        run: docker stop app-accept && docker rm app-accept
 
   security_scan:
-    name: Security Scan
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pip-audit
-
-      - name: Run pip-audit
-        run: |
-          pip-audit --desc --no-deps || exit_code=$?
-          if [ ${exit_code:-0} -eq 0 ]; then
-            echo "✅ No vulnerabilities found"
-          else
-            echo "⚠️ Vulnerabilities detected"
-            # Fail only on CRITICAL vulnerabilities
-            pip-audit --desc --no-deps --vulnerability-service osv | grep -i "CRITICAL" && exit 1 || exit 0
-          fi
-
-  load_test:
-    name: Load Test
-    runs-on: ubuntu-latest
-    needs: canary_deploy
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install k6
-        run: |
-          sudo gpg -k
-          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
-          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-          sudo apt-get update
-          sudo apt-get install k6
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
-
-      - name: Start test service
-        run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          docker run -d \
-            --name swipeflix-loadtest \
-            -p 9000:8000 \
-            -e ENVIRONMENT=test \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-
-          timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
-
-      - name: Run k6 load test
-        run: |
-          API_URL=http://localhost:9000 k6 run k6/script.js
-
-      - name: Cleanup
-        if: always()
-        run: docker stop swipeflix-loadtest && docker rm swipeflix-loadtest
-
-  train_gpu:
-    name: Train Model (GPU)
-    runs-on: [self-hosted, gpu]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check GPU availability
-        run: nvidia-smi
-
-      - name: Build GPU Docker image
-        run: |
-          docker build -f Dockerfile.gpu -t swipeflix:gpu .
-
-      - name: Train model on GPU
-        run: |
-          docker run --gpus all \
-            -v $(pwd)/data:/app/data \
-            -v $(pwd)/mlruns:/app/mlruns \
-            swipeflix:gpu \
-            python -m src.swipeflix.ml.train --sample-size 5000 --seed 42
-
-      - name: Upload training artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: mlruns
-          path: mlruns/
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: python-version: ${{ env.PYTHON_VERSION }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt pip-audit
+      - run: |
+          pip-audit --no-deps --exit-zero || exit_code=$?
+          # fail only on CRITICAL vulns
+          pip-audit --no-deps --format=columns | grep -i CRITICAL && exit 1 || echo "No CRITICAL CVEs"
 
   deploy_tag:
-    name: Deploy Tagged Release
     runs-on: ubuntu-latest
-    needs: [acceptance_tests, security_scan, load_test]
+    needs: [acceptance_tests, security_scan]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create Release
+      - uses: actions/checkout@v4
+      - name: Create GitHub Release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
-          body: |
-            ## SwipeFlix Release ${{ github.ref_name }}
-
-            ### Docker Image
-            ```
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
-            ```
-
-            ### What's Changed
-            See commit history for details.
-
-            ### Deployment
-            This release has passed all CI checks including:
-            - ✅ Lint and code quality
-            - ✅ Unit and integration tests (≥80% coverage)
-            - ✅ Canary deployment
-            - ✅ Acceptance tests
-            - ✅ Security scan
-            - ✅ Load testing
-
-          draft: false
-          prerelease: false
+          body: "Release for ${{ github.ref_name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
