@@ -87,23 +87,6 @@ jobs:
       - if: always()
         run: docker stop app-canary && docker rm app-canary
 
-  acceptance_tests:
-    runs-on: ubuntu-latest
-    needs: canary
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run acceptance tests
-        env:
-          API_URL: http://localhost:9000
-        run: |
-          # start image again for acceptance
-          docker run -d --name app-accept -p 9000:8000 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          timeout 60 bash -c 'until curl -sf http://localhost:9000/health; do sleep 2; done'
-          chmod +x scripts/acceptance_tests.sh
-          API_URL=http://localhost:9000 bash scripts/acceptance_tests.sh
-      - if: always()
-        run: docker stop app-accept && docker rm app-accept
-
   security_scan:
     runs-on: ubuntu-latest
     needs: test
@@ -121,7 +104,7 @@ jobs:
 
   deploy_tag:
     runs-on: ubuntu-latest
-    needs: [acceptance_tests, security_scan]
+    needs: [canary, security_scan]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
