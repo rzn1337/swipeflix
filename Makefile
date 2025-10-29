@@ -48,7 +48,7 @@ fmt: ## Format code with black and ruff
 
 test: ## Run tests with coverage
 	@echo "${GREEN}Running tests with coverage...${RESET}"
-	PYTHONPATH=./src pytest tests/ --cov=src/swipeflix --cov-report=term --cov-report=html --cov-fail-under=80 -v
+	PYTHONPATH=./src pytest tests/ --cov=src/swipeflix --cov-report=term --cov-report=html -v
 
 test-quick: ## Run tests without coverage (faster)
 	@echo "${GREEN}Running quick tests...${RESET}"

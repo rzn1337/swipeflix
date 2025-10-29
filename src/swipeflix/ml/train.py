@@ -123,7 +123,7 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
         recommendations = []
         for idx in top_indices:
             movie_id = self.reverse_item_mapping[idx]
-            movie_data = self.movies_df[self.movies_df["movieId"] == movie_id]
+            movie_data = self.movies_df[self.movies_df["id"] == movie_id]
 
             if not movie_data.empty:
                 recommendations.append(
@@ -131,8 +131,8 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
                         "movie_id": movie_id,
                         "title": movie_data.iloc[0]["title"],
                         "score": float(hybrid_scores[idx]),
-                        "genres": movie_data.iloc[0].get("genres", "").split("|")
-                        if pd.notna(movie_data.iloc[0].get("genres"))
+                        "genres": movie_data.iloc[0].get("genre", "").split("|")
+                        if pd.notna(movie_data.iloc[0].get("genre"))
                         else [],
                     }
                 )
@@ -163,11 +163,11 @@ class HybridRecommenderModel(mlflow.pyfunc.PythonModel):
         for _, movie in popular_movies.iterrows():
             recommendations.append(
                 {
-                    "movie_id": str(movie["movieId"]),
+                    "movie_id": str(movie["id"]),
                     "title": movie["title"],
                     "score": 0.5,
-                    "genres": movie.get("genres", "").split("|")
-                    if pd.notna(movie.get("genres"))
+                    "genres": movie.get("genre", "").split("|")
+                    if pd.notna(movie.get("genre"))
                     else [],
                 }
             )

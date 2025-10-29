@@ -12,8 +12,8 @@ def test_data_preprocessor_clean_data(sample_movies_data, sample_ratings_data):
 
     assert len(movies) > 0
     assert len(ratings) > 0
-    assert not movies["movieId"].isna().any()
-    assert not ratings["userId"].isna().any()
+    assert not movies["id"].isna().any()
+    assert not ratings["user_id"].isna().any()
 
 
 def test_data_preprocessor_user_item_matrix(sample_movies_data, sample_ratings_data):
@@ -26,7 +26,7 @@ def test_data_preprocessor_user_item_matrix(sample_movies_data, sample_ratings_d
     assert isinstance(matrix, pd.DataFrame)
     assert matrix.shape[0] > 0  # Has users
     assert matrix.shape[1] > 0  # Has movies
-    assert matrix.index.name == "userId"
+    assert matrix.index.name == "user_id"
 
 
 def test_data_preprocessor_content_features(sample_movies_data, sample_ratings_data):
@@ -51,7 +51,7 @@ def test_data_preprocessor_sampling(sample_movies_data, sample_ratings_data):
     movies, ratings = preprocessor.sample_data(sample_size)
 
     # Should have at most sample_size users
-    assert len(ratings["userId"].unique()) <= sample_size
+    assert len(ratings["user_id"].unique()) <= sample_size
 
 
 def test_hybrid_model_initialization():
@@ -150,16 +150,17 @@ def test_data_cleaning_removes_duplicates():
     """Test that data cleaning removes duplicates."""
     movies_df = pd.DataFrame(
         {
-            "movieId": ["1", "1", "2"],
+            "id": ["1", "1", "2"],
             "title": ["Movie 1", "Movie 1 Dup", "Movie 2"],
-            "genres": ["Action", "Action", "Comedy"],
+            "genre": ["Action", "Action", "Comedy"],
+            "plot": ["Plot 1", "Plot 1 Dup", "Plot 2"],
         }
     )
 
     ratings_df = pd.DataFrame(
         {
-            "userId": ["1", "1", "2"],
-            "movieId": ["1", "1", "2"],
+            "user_id": ["1", "1", "2"],
+            "movie_id": ["1", "1", "2"],
             "rating": [5.0, 5.0, 4.0],
         }
     )
@@ -176,16 +177,17 @@ def test_data_cleaning_handles_missing_values():
     """Test that data cleaning handles missing values."""
     movies_df = pd.DataFrame(
         {
-            "movieId": ["1", "2", None],
+            "id": ["1", "2", None],
             "title": ["Movie 1", None, "Movie 3"],
-            "genres": ["Action", "Comedy", "Drama"],
+            "genre": ["Action", "Comedy", "Drama"],
+            "plot": ["Plot 1", "Plot 2", "Plot 3"],
         }
     )
 
     ratings_df = pd.DataFrame(
         {
-            "userId": ["1", "2", "3"],
-            "movieId": ["1", None, "3"],
+            "user_id": ["1", "2", "3"],
+            "movie_id": ["1", None, "3"],
             "rating": [5.0, 4.0, None],
         }
     )
@@ -194,8 +196,8 @@ def test_data_cleaning_handles_missing_values():
     movies, ratings = preprocessor.clean_data()
 
     # Should remove rows with missing critical values
-    assert not movies["movieId"].isna().any()
+    assert not movies["id"].isna().any()
     assert not movies["title"].isna().any()
-    assert not ratings["userId"].isna().any()
-    assert not ratings["movieId"].isna().any()
+    assert not ratings["user_id"].isna().any()
+    assert not ratings["movie_id"].isna().any()
     assert not ratings["rating"].isna().any()

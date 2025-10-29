@@ -18,7 +18,7 @@ def sample_movies_data():
     """Create sample movies dataframe for testing."""
     return pd.DataFrame(
         {
-            "movieId": ["1", "2", "3", "4", "5"],
+            "id": ["1", "2", "3", "4", "5"],
             "title": [
                 "Toy Story (1995)",
                 "Jumanji (1995)",
@@ -26,12 +26,19 @@ def sample_movies_data():
                 "Waiting to Exhale (1995)",
                 "Father of the Bride Part II (1995)",
             ],
-            "genres": [
+            "genre": [
                 "Adventure|Animation|Children|Comedy|Fantasy",
                 "Adventure|Children|Fantasy",
                 "Comedy|Romance",
                 "Comedy|Drama|Romance",
                 "Comedy",
+            ],
+            "plot": [
+                "A story about toys that come to life",
+                "A board game that becomes real",
+                "Two grumpy old men",
+                "A story about friendship",
+                "A wedding comedy",
             ],
         }
     )
@@ -47,8 +54,8 @@ def sample_ratings_data():
             if np.random.random() > 0.3:  # 70% density
                 data.append(
                     {
-                        "userId": str(user_id),
-                        "movieId": str(movie_id),
+                        "user_id": str(user_id),
+                        "movie_id": str(movie_id),
                         "rating": np.random.choice([1.0, 2.0, 3.0, 4.0, 5.0]),
                     }
                 )
