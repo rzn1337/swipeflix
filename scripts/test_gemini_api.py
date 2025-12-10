@@ -9,10 +9,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from loguru import logger
+from loguru import logger  # noqa: E402
 
-from swipeflix.config import settings
-from swipeflix.llm.gemini_client import get_gemini_client
+from swipeflix.config import settings  # noqa: E402
+from swipeflix.llm.gemini_client import get_gemini_client  # noqa: E402
 
 
 def test_gemini_api():

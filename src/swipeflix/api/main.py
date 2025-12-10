@@ -137,12 +137,12 @@ async def root():
     }
 
 
-from pathlib import Path
+from pathlib import Path  # noqa: E402
 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse  # noqa: E402
 
 # Serve frontend
-from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 frontend_path = Path(__file__).parent.parent.parent.parent / "frontend"
 if frontend_path.exists():

@@ -11,12 +11,12 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 sys.path.insert(0, str(project_root))
 
-import pandas as pd
-from loguru import logger
+import pandas as pd  # noqa: E402
+from loguru import logger  # noqa: E402
 
 try:
-    from evidently.metric_preset import DataDriftPreset, DataQualityPreset
-    from evidently.report import Report
+    from evidently.metric_preset import DataDriftPreset, DataQualityPreset  # noqa: E402
+    from evidently.report import Report  # noqa: E402
 
     EVIDENTLY_AVAILABLE = True
 except ImportError:

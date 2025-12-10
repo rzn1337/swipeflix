@@ -15,7 +15,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from swipeflix.rag.ingest import DocumentIngester
+from swipeflix.rag.ingest import DocumentIngester  # noqa: E402
 
 
 def main():

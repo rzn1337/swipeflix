@@ -18,10 +18,10 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 sys.path.insert(0, str(project_root))
 
-from loguru import logger
+from loguru import logger  # noqa: E402
 
-from experiments.prompts.evaluator import PromptEvaluator, load_eval_dataset
-from experiments.prompts.strategies import get_all_strategies, get_strategy
+from experiments.prompts.evaluator import PromptEvaluator, load_eval_dataset  # noqa: E402
+from experiments.prompts.strategies import get_all_strategies, get_strategy  # noqa: E402
 
 
 def create_mock_context_provider(movies_data):
