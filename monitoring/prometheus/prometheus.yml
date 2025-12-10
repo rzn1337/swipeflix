@@ -18,16 +18,20 @@ global:
 
 scrape_configs:
   # Prometheus self-monitoring
-- job_name: prometheus
-  static_configs:
-  - targets: [localhost:9090]
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
 
   # SwipeFlix API
-- job_name: swipeflix-api
-  scrape_interval: 10s
-  metrics_path: /metrics
-  static_configs:
-  - targets: [app:8000]
+  # Note: Use 'app:8000' if API is in Docker, 'host.docker.internal:8000' if API is local
+  - job_name: swipeflix-api
+    scrape_interval: 10s
+    metrics_path: /metrics
+    static_configs:
+    - targets:
+      - app:8000    # Docker service name (when API is in Docker)
+      - host.docker.internal:8000    # Local API (Windows/Mac)
+        # - 172.17.0.1:8000  # Local API (Linux - uncomment if needed)
     labels:
       service: swipeflix-api
       environment: development

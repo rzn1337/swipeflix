@@ -126,7 +126,12 @@ k6/results/
 # Pre-commit
 .pre-commit-config.yaml.bak
 
+# Cache and generated files
+.cache/
+data/faiss_index/
+data/*.index
 
+# Documentation (keep only essential)
 *.md
 !README.md
 !CODE_OF_CONDUCT.md
@@ -134,3 +139,6 @@ k6/results/
 !docs/AWS_SETUP_GUIDE.md
 !docs/CLOUD_DEPLOYMENT.md
 !docs/GPU_RUNNER_SETUP.md
+!EVALUATION.md
+!SECURITY.md
+!docs/RAG_ARCHITECTURE.md

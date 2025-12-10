@@ -1,4 +1,4 @@
-.PHONY: help dev start train train-full lint fmt test docker-build docker-run compose-up compose-down precommit clean
+.PHONY: help dev start train train-full lint fmt test docker-build docker-run compose-up compose-down precommit clean rag ingest eval-prompts
 
 # Colors for output
 GREEN  := $(shell tput -Txterm setaf 2)
@@ -26,12 +26,16 @@ start: ## Run FastAPI server locally
 	@echo "${GREEN}Starting SwipeFlix API server...${RESET}"
 	PYTHONPATH=./src uvicorn swipeflix.api.main:app --host 0.0.0.0 --port 8000 --reload
 
-train: ## Train model with sample data (fast for development)
-	@echo "${GREEN}Training model with sample data...${RESET}"
-	PYTHONPATH=./src python src/swipeflix/ml/train.py
+train: ## Train model with sample data (fast for development) - saves locally
+	@echo "${GREEN}Training model locally with sample data...${RESET}"
+	PYTHONPATH=./src python src/swipeflix/ml/train_local.py --sample-size 2000
 
-train-full: ## Train model on full dataset
-	@echo "${GREEN}Training model on full dataset...${RESET}"
+train-full: ## Train model on full dataset - saves locally
+	@echo "${GREEN}Training model locally on full dataset...${RESET}"
+	PYTHONPATH=./src python src/swipeflix/ml/train_local.py
+
+train-mlflow: ## Train model with MLflow (requires MLflow running)
+	@echo "${GREEN}Training model with MLflow tracking...${RESET}"
 	PYTHONPATH=./src python src/swipeflix/ml/train.py
 
 lint: ## Run linter (ruff)
@@ -134,6 +138,73 @@ dvc-push: ## Push data to DVC remote
 k6-test: ## Run k6 load tests
 	@echo "${GREEN}Running k6 load tests...${RESET}"
 	k6 run k6/script.js
+
+# ============================================
+# Milestone 2: LLMOps Targets
+# ============================================
+
+rag: ingest start-rag ## Run full RAG pipeline end-to-end
+	@echo "${GREEN}RAG pipeline ready!${RESET}"
+	@echo "  - API: http://localhost:8000"
+	@echo "  - RAG endpoints: http://localhost:8000/rag/"
+	@echo "  - Frontend: http://localhost:8000/app"
+
+ingest: ## Ingest movie data into FAISS vector index
+	@echo "${GREEN}Ingesting movie data into vector index...${RESET}"
+	@echo "${YELLOW}Note: If you see warnings about sentence-transformers, the code will use fallback embeddings.${RESET}"
+	PYTHONPATH=./src python -c "from swipeflix.rag.ingest import ingest_movies; ingest_movies()"
+	@echo "${GREEN}Ingestion complete! Index saved to data/faiss_index/${RESET}"
+
+install-llm-deps: ## Install LLM dependencies (handles Windows PyTorch issues)
+	@echo "${GREEN}Installing LLM dependencies...${RESET}"
+	@echo "${YELLOW}For Windows: If you encounter PyTorch DLL errors, run:${RESET}"
+	@echo "${YELLOW}  pip install torch --index-url https://download.pytorch.org/whl/cpu${RESET}"
+	@echo "${YELLOW}  pip install sentence-transformers${RESET}"
+	@echo "${YELLOW}Or use: bash scripts/install_llm_deps_windows.sh${RESET}"
+	pip install -r requirements-llm.txt || echo "${YELLOW}Some optional dependencies failed - code has fallbacks${RESET}"
+
+start-rag: ## Start API server with RAG enabled
+	@echo "${GREEN}Starting SwipeFlix API with RAG...${RESET}"
+	PYTHONPATH=./src uvicorn swipeflix.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+eval-prompts: ## Run prompt evaluation experiments
+	@echo "${GREEN}Running prompt evaluation experiments...${RESET}"
+	PYTHONPATH=./src:. python experiments/prompts/run_experiments.py --output-dir experiments/results
+	@echo "${GREEN}Results saved to experiments/results/${RESET}"
+
+eval-prompts-quick: ## Run quick prompt evaluation (5 samples)
+	@echo "${GREEN}Running quick prompt evaluation...${RESET}"
+	PYTHONPATH=./src:. python experiments/prompts/run_experiments.py --max-samples 5 --output-dir experiments/results
+
+rag-drift-report: ## Generate Evidently drift report for RAG corpus
+	@echo "${GREEN}Generating RAG corpus drift report...${RESET}"
+	python scripts/generate_rag_drift_report.py
+	@echo "${GREEN}Report saved to monitoring/evidently/rag_corpus_drift_report.html${RESET}"
+
+test-rag: ## Run RAG and guardrail tests
+	@echo "${GREEN}Running RAG and guardrail tests...${RESET}"
+	PYTHONPATH=./src pytest tests/test_rag.py tests/test_guardrails.py tests/test_llm.py -v
+
+docker-build-rag: ## Build RAG-enabled Docker image
+	@echo "${GREEN}Building RAG Docker image...${RESET}"
+	DOCKER_BUILDKIT=1 docker build -f Dockerfile.rag -t swipeflix:rag .
+
+docker-run-rag: ## Run RAG Docker container
+	@echo "${GREEN}Running RAG Docker container...${RESET}"
+	docker run -d -p 8000:8000 --name swipeflix-rag \
+		-e GEMINI_API_KEY=$${GEMINI_API_KEY} \
+		swipeflix:rag
+	@echo "${GREEN}Container started! Access at http://localhost:8000${RESET}"
+
+compose-up-rag: ## Start Docker Compose with RAG profile
+	@echo "${GREEN}Starting Docker Compose with RAG...${RESET}"
+	docker-compose --profile dev up --build -d
+	@echo "${GREEN}Services started!${RESET}"
+	@echo "  - API + RAG:   http://localhost:8000"
+	@echo "  - Frontend:    http://localhost:8000/app"
+	@echo "  - RAG Health:  http://localhost:8000/rag/health"
+	@echo "  - MLflow:      http://localhost:5000"
+	@echo "  - Grafana:     http://localhost:3000"
 
 clean: ## Clean up temporary files and caches
 	@echo "${GREEN}Cleaning up...${RESET}"

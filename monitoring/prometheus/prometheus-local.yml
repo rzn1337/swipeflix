@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: swipeflix-monitor
+    environment: development
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # SwipeFlix API (running locally)
+- job_name: swipeflix-api
+  scrape_interval: 10s
+  metrics_path: /metrics
+  static_configs:
+      - targets: ["localhost:8000"]
+    labels:
+      service: swipeflix-api
+      environment: development
+
+  # MLflow (if metrics endpoint available)
+- job_name: mlflow
+  scrape_interval: 30s
+  static_configs:
+      - targets: ["localhost:5000"]
+    labels:
+      service: mlflow
+      environment: development
+
+  # MinIO metrics
+- job_name: minio
+  scrape_interval: 30s
+  metrics_path: /minio/v2/metrics/cluster
+  static_configs:
+  - targets: [localhost:9000]
+    labels:
+      service: minio
+      environment: development

@@ -12,6 +12,15 @@ from swipeflix.api.middleware import LoggingMiddleware, MetricsMiddleware
 from swipeflix.api.routes import router
 from swipeflix.config import settings
 
+# Import RAG routes
+try:
+    from swipeflix.api.rag_routes import router as rag_router
+
+    RAG_ROUTES_AVAILABLE = True
+except ImportError:
+    RAG_ROUTES_AVAILABLE = False
+    logger.warning("RAG routes not available")
+
 # Configure logging
 logger.remove()
 logger.add(
@@ -103,6 +112,11 @@ if settings.debug:
 # Include routes
 app.include_router(router, prefix="")
 
+# Include RAG routes if available
+if RAG_ROUTES_AVAILABLE:
+    app.include_router(rag_router)
+    logger.info("RAG routes enabled")
+
 # Mount Prometheus metrics endpoint
 if settings.prometheus_enabled:
     metrics_app = make_asgi_app()
@@ -118,7 +132,27 @@ async def root():
         "version": settings.app_version,
         "docs": "/docs",
         "health": "/health",
+        "rag": "/rag/health" if RAG_ROUTES_AVAILABLE else None,
+        "frontend": "/app",
     }
+
+
+from pathlib import Path
+
+from fastapi.responses import FileResponse
+
+# Serve frontend
+from fastapi.staticfiles import StaticFiles
+
+frontend_path = Path(__file__).parent.parent.parent.parent / "frontend"
+if frontend_path.exists():
+
+    @app.get("/app", include_in_schema=False)
+    async def serve_frontend():
+        """Serve the SwipeFlix frontend."""
+        return FileResponse(frontend_path / "index.html")
+
+    app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
 
 
 if __name__ == "__main__":

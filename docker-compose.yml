@@ -5,6 +5,7 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: swipeflix-postgres
+    # pragma: allowlist secret
     environment:
       POSTGRES_USER: mlflow
       POSTGRES_PASSWORD: mlflow
@@ -26,6 +27,7 @@ services:
   minio:
     image: minio/minio:latest
     container_name: swipeflix-minio
+    # pragma: allowlist secret
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -36,7 +38,7 @@ services:
     - 9000:9000
     - 9001:9001
     healthcheck:
-      test: [CMD, curl, -f, http://localhost:9000/minio/health/live]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -74,6 +76,7 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    # pragma: allowlist secret
     environment:
     - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
     - AWS_ACCESS_KEY_ID=minioadmin
@@ -101,7 +104,10 @@ services:
     container_name: swipeflix-prometheus
     volumes:
     - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - ./monitoring/prometheus/prometheus-local.yml:/etc/prometheus/prometheus-local.yml
     - prometheus_data:/prometheus
+    extra_hosts:
+    - host.docker.internal:host-gateway      # Allows access to host from container
     command:
     - --config.file=/etc/prometheus/prometheus.yml
     - --storage.tsdb.path=/prometheus

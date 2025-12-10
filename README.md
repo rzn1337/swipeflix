@@ -1,20 +1,104 @@
 # 🎬 SwipeFlix - Swipe-First Movie Recommender
 
-**One-line pitch:** A hybrid movie recommendation system that combines collaborative
-filtering and content-based approaches, packaged as a production-ready FastAPI service
-with complete MLOps infrastructure.
+**One-line pitch:** A hybrid movie recommendation system with RAG-powered LLM assistant,
+combining collaborative filtering, content-based approaches, and LLMOps best practices
+in a production-ready FastAPI service.
 
-![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
 ![MLflow](https://img.shields.io/badge/MLflow-2.8+-orange.svg)
 ![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
+![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+______________________________________________________________________
+
+## 🆕 Milestone 2: LLMOps Features
+
+SwipeFlix v2.0 introduces a complete **LLMOps pipeline** with:
+
+### 🤖 RAG-Powered CineBot Assistant
+
+- **Q&A with citations**: Ask questions about movies, get grounded answers
+- **Blurb generation**: AI-generated swipe-card copy
+- **Review summarization**: Condense reviews + sentiment analysis
+- **Structured extraction**: Extract movie metadata from text
+- **Personalized rationales**: Explain why movies match users
+
+### 🎯 Prompt Engineering Workflow
+
+- **4 prompt strategies**: Zero-Shot, Few-Shot (k=3, k=5), Chain-of-Thought, Meta-Prompt
+- **Evaluation pipeline**: ROUGE-L, embedding similarity, qualitative metrics
+- **MLflow integration**: Track experiments, compare strategies
+- **Reports**: Automated prompt_report.md generation
+
+### 🛡️ Guardrails & Safety
+
+- **PII detection**: Email, phone, SSN, credit card redaction
+- **Prompt injection filter**: Block manipulation attempts
+- **Toxicity filter**: ML-based content moderation
+- **Hallucination detection**: Verify response grounding
+
+### 📊 LLM Monitoring
+
+- **Prometheus metrics**: Latency, tokens, cache hits, violations
+- **Grafana dashboard**: LLMOps-specific visualizations
+- **Rate limit tracking**: Gemini free tier management
+- **A/B testing**: Compare prompt variants in production
+
+### 📱 Swipe-First Frontend
+
+- Beautiful mobile-first swipe UI
+- Integrated CineBot chat
+- Real-time recommendations with rationales
 
 ______________________________________________________________________
 
 ## 📐 Architecture
 
+### System Architecture
+
 ![System Architecture](architecture.png)
+
+### RAG Pipeline Architecture
+
+```mermaid
+flowchart LR
+    subgraph Input
+        User[User Query]
+    end
+
+    subgraph Guardrails
+        IV[Input Validator]
+        PII[PII Filter]
+        INJ[Injection Filter]
+    end
+
+    subgraph RAG
+        Ret[Retriever]
+        VDB[(FAISS)]
+        Gen[Generator]
+    end
+
+    subgraph LLM
+        Prompt[Prompt Strategy]
+        Gemini[Gemini 2.5 Flash]
+        Cache[(Cache)]
+    end
+
+    subgraph Output
+        OV[Output Validator]
+        Resp[Response]
+    end
+
+    User --> IV --> PII --> INJ --> Ret
+    Ret --> VDB --> Gen
+    Gen --> Prompt --> Gemini
+    Gemini --> Cache
+    Gen --> OV --> Resp
+```
+
+See [docs/RAG_ARCHITECTURE.md](docs/RAG_ARCHITECTURE.md) for detailed diagrams.
 
 ______________________________________________________________________
 
@@ -63,6 +147,34 @@ SwipeFlix implements **ALL 5 bonus features** as specified in Milestone 1 requir
 
 ______________________________________________________________________
 
+## 🎁 Milestone 2 Bonus Features
+
+### ✅ Bonus: LangChain/LlamaIndex Integration
+
+- **LangChain** for RAG pipeline orchestration
+- **Custom retrievers** for movie-specific semantic search
+- **FAISS vector store** integration
+- **Location:** `src/swipeflix/rag/`, `requirements-llm.txt`
+
+### ✅ Bonus: A/B Testing Dashboard
+
+- **Prompt variant comparison** in production
+- **Traffic splitting** (configurable weights)
+- **Deterministic assignment** based on user_id
+- **Metrics:** impressions, latency, quality scores
+- **Grafana visualization** of variant performance
+- **Location:** `src/swipeflix/api/rag_routes.py`, Grafana dashboard
+
+```bash
+# Get A/B variant assignment
+curl http://localhost:8000/rag/ab-test/prompt_experiment?user_id=user123
+
+# View experiment config
+curl http://localhost:8000/rag/ab-test-config
+```
+
+______________________________________________________________________
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -94,6 +206,42 @@ make start
 The API will be available at `http://localhost:8000`. Visit `http://localhost:8000/docs`
 for interactive API documentation.
 
+### Milestone 2: RAG Setup
+
+```bash
+# Set Gemini API key (get free key at https://aistudio.google.com/)
+export GEMINI_API_KEY=your_key_here  # Linux/Mac
+# or
+set GEMINI_API_KEY=your_key_here     # Windows CMD
+# or
+$env:GEMINI_API_KEY="your_key_here"  # Windows PowerShell
+
+# Install LLM dependencies
+pip install -r requirements-llm.txt
+
+# Windows users: If you encounter PyTorch DLL errors, install PyTorch CPU separately:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install sentence-transformers
+# Or use the helper script:
+#   bash scripts/install_llm_deps_windows.sh
+#   # or
+#   scripts/install_llm_deps_windows.bat
+
+# Note: If sentence-transformers fails to install, the code will use fallback embeddings
+# The RAG pipeline will still work, just with simpler (but functional) embeddings
+
+# Ingest movie data into vector index
+make ingest
+
+# Start server with RAG enabled
+make start-rag
+
+# Access:
+# - API: http://localhost:8000
+# - Frontend: http://localhost:8000/app
+# - RAG endpoints: http://localhost:8000/rag/
+```
+
 ### Docker Compose Stack (Recommended)
 
 ```bash
@@ -113,21 +261,26 @@ ______________________________________________________________________
 
 ## 🎯 Make Targets
 
-| Target              | Description                                         |
-| ------------------- | --------------------------------------------------- |
-| `make dev`          | Create virtual environment and install dependencies |
-| `make start`        | Run FastAPI server locally (uvicorn)                |
-| `make train`        | Train model with sample data (quick)                |
-| `make train-full`   | Train model on full dataset                         |
-| `make lint`         | Run ruff linter                                     |
-| `make fmt`          | Format code with black                              |
-| `make test`         | Run pytest with coverage (≥80% required)            |
-| `make docker-build` | Build production Docker image                       |
-| `make docker-run`   | Run Docker container locally                        |
-| `make compose-up`   | Start Docker Compose dev stack                      |
-| `make compose-down` | Stop Docker Compose stack                           |
-| `make precommit`    | Run pre-commit hooks on all files                   |
-| `make clean`        | Clean up temporary files                            |
+| Target                  | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `make dev`              | Create virtual environment and install dependencies |
+| `make start`            | Run FastAPI server locally (uvicorn)                |
+| `make train`            | Train model with sample data (quick)                |
+| `make train-full`       | Train model on full dataset                         |
+| `make lint`             | Run ruff linter                                     |
+| `make fmt`              | Format code with black                              |
+| `make test`             | Run pytest with coverage (≥80% required)            |
+| `make docker-build`     | Build production Docker image                       |
+| `make docker-run`       | Run Docker container locally                        |
+| `make compose-up`       | Start Docker Compose dev stack                      |
+| `make compose-down`     | Stop Docker Compose stack                           |
+| `make precommit`        | Run pre-commit hooks on all files                   |
+| `make clean`            | Clean up temporary files                            |
+| `make rag`              | **\[M2\]** Run full RAG pipeline end-to-end         |
+| `make ingest`           | **\[M2\]** Ingest movies into FAISS vector index    |
+| `make eval-prompts`     | **\[M2\]** Run prompt evaluation experiments        |
+| `make test-rag`         | **\[M2\]** Run RAG and guardrail tests              |
+| `make docker-build-rag` | **\[M2\]** Build RAG-enabled Docker image           |
 
 ______________________________________________________________________
 
@@ -215,6 +368,86 @@ curl http://localhost:8000/metrics
 
 ______________________________________________________________________
 
+## 🤖 RAG API Usage (Milestone 2)
+
+### RAG Q&A Query
+
+```bash
+curl -X POST http://localhost:8000/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What are good sci-fi movies from the 2000s?",
+    "top_k": 5,
+    "include_sources": true
+  }'
+```
+
+Response:
+
+```json
+{
+  "query": "What are good sci-fi movies from the 2000s?",
+  "answer": "Based on the movie database, here are excellent sci-fi films...",
+  "sources": [
+    {"id": "19995", "title": "Avatar", "relevance": 0.87},
+    {"id": "24428", "title": "The Avengers", "relevance": 0.82}
+  ],
+  "grounded": true,
+  "confidence": "HIGH",
+  "latency_ms": 1250.5,
+  "tokens_used": 450
+}
+```
+
+### Generate Movie Blurb
+
+```bash
+curl -X POST http://localhost:8000/rag/blurb \
+  -H "Content-Type: application/json" \
+  -d '{
+    "movie_id": "19995",
+    "tone": "engaging",
+    "max_length": 100
+  }'
+```
+
+### Summarize Reviews
+
+```bash
+curl -X POST http://localhost:8000/rag/summarize-reviews \
+  -H "Content-Type: application/json" \
+  -d '{
+    "movie_id": "19995",
+    "reviews": ["Amazing visuals!", "Best 3D experience ever", "Story was predictable"]
+  }'
+```
+
+### Semantic Movie Search
+
+```bash
+curl "http://localhost:8000/rag/search?query=movies%20about%20space%20exploration&top_k=10"
+```
+
+### Check Rate Limits
+
+```bash
+curl http://localhost:8000/rag/rate-limit
+```
+
+Response:
+
+```json
+{
+  "requests_this_minute": 2,
+  "tokens_this_minute": 1500,
+  "requests_today": 8,
+  "rpm_remaining": 3,
+  "daily_remaining": 12
+}
+```
+
+______________________________________________________________________
+
 ## 🧪 Testing
 
 ```bash
@@ -229,6 +462,63 @@ pytest --cov=src/swipeflix --cov-report=html
 ```
 
 Coverage must be ≥80% for CI to pass.
+
+______________________________________________________________________
+
+## 🧪 Prompt Engineering Experiments (Milestone 2)
+
+### Running Experiments
+
+```bash
+# Run full evaluation (requires GEMINI_API_KEY)
+export GEMINI_API_KEY=your_key
+make eval-prompts
+
+# Quick evaluation (5 samples, no API needed)
+make eval-prompts-quick
+
+# Specific strategies only
+python experiments/prompts/run_experiments.py --strategies zero_shot meta_prompt
+```
+
+### Prompt Strategies Compared
+
+| Strategy             | Description                   | Best For                     |
+| -------------------- | ----------------------------- | ---------------------------- |
+| **Zero-Shot**        | Direct prompting, no examples | Simple queries, low latency  |
+| **Few-Shot (k=3)**   | 3 example Q&A pairs           | Consistent formatting        |
+| **Few-Shot (k=5)**   | 5 example Q&A pairs           | Higher quality responses     |
+| **Chain-of-Thought** | Step-by-step reasoning        | Complex analytical queries   |
+| **Meta-Prompt**      | Persona + rules + format      | Production use, best quality |
+
+### Evaluation Metrics
+
+**Quantitative:**
+
+- ROUGE-L F1: N-gram overlap with reference
+- Embedding Cosine Similarity: Semantic similarity
+
+**Qualitative (1-5 scale):**
+
+- Factuality: Accuracy based on context
+- Helpfulness: Structure, completeness, actionability
+
+### Results
+
+See [EVALUATION.md](EVALUATION.md) for detailed results and insights.
+
+```bash
+# View latest results
+cat experiments/results/prompt_report.md
+```
+
+### MLflow Tracking
+
+Experiments are logged to MLflow:
+
+- Access at: http://localhost:5000
+- Experiment: `swipeflix-prompt-experiments`
+- Logged: parameters, metrics, result artifacts
 
 ______________________________________________________________________
 
@@ -252,6 +542,30 @@ pip-audit
 
 # CI fails on CRITICAL vulnerabilities
 ```
+
+### LLM Security (Milestone 2)
+
+SwipeFlix implements comprehensive LLM security measures:
+
+**Input Protection:**
+
+- PII detection and redaction (email, phone, SSN, credit cards)
+- Prompt injection detection and blocking
+- Input length validation
+
+**Output Protection:**
+
+- Toxicity filtering (ML-based + keyword fallback)
+- Hallucination detection against context
+- Content policy enforcement
+
+**Rate Limiting:**
+
+- 5 requests/minute (RPM)
+- 250K tokens/minute (TPM)
+- 20 requests/day (Gemini free tier)
+
+See [SECURITY.md](SECURITY.md) for complete security documentation.
 
 ______________________________________________________________________
 
@@ -390,13 +704,68 @@ Drift Score: 0.08
 
 ### Grafana Dashboards
 
-**Grafana Dashboard:**  
-![Grafana Dashboard](grafana.png)  
-*Real-time monitoring of API performance, inference latency, and GPU utilization*
+**Grafana Dashboard:**\
+![Grafana Dashboard](grafana.png)\
+*Real-time monitoring of API
+performance, inference latency, and GPU utilization*
 
-**Evidently Drift Report:**  
-[View Evidently Drift Report](monitoring/evidently/drift_report.html)  
-*Data drift monitoring showing distribution changes over time*
+**LLMOps Dashboard (Milestone 2):**\
+Access at: http://localhost:3000 → SwipeFlix LLMOps
+Dashboard
+
+Monitors:
+
+- LLM request rate and latency (p95)
+- Token usage and cost estimation
+- Rate limit status (RPM, TPM, Daily)
+- Guardrail violations by type
+- RAG retrieval latency and relevance scores
+- Cache hit rates (memory/disk)
+- A/B test impressions by variant
+
+**Screenshot Instructions:** See
+[MILESTONE2_DELIVERABLES_CHECKLIST.md](MILESTONE2_DELIVERABLES_CHECKLIST.md) for
+complete screenshot guide.
+
+**Evidently RAG Corpus Drift Monitoring:**
+
+```bash
+# Generate drift report for retrieval corpus
+python scripts/generate_rag_drift_report.py
+
+# View report
+open monitoring/evidently/rag_corpus_drift_report.html
+
+# Or access Evidently service
+# http://localhost:7000
+```
+
+**Evidently Drift
+Report:**\
+[View Evidently Drift Report](monitoring/evidently/drift_report.html)\
+*Data
+drift monitoring showing distribution changes over time*
+
+**Evidently RAG Corpus Drift (Milestone 2):**
+
+```bash
+# Generate drift report for retrieval corpus
+make rag-drift-report
+# View: monitoring/evidently/rag_corpus_drift_report.html
+```
+
+*Monitors data drift in the movie document corpus used for RAG retrieval*
+
+**📸 Screenshot & Submission Guide:**\
+For complete screenshot instructions and
+deliverables verification:
+
+- [MILESTONE2_DELIVERABLES_CHECKLIST.md](MILESTONE2_DELIVERABLES_CHECKLIST.md) -
+  Detailed screenshot guide with 20 required screenshots
+- [MILESTONE2_SUBMISSION_GUIDE.md](MILESTONE2_SUBMISSION_GUIDE.md) - Step-by-step
+  submission checklist
+- [DELIVERABLES_VERIFICATION.md](DELIVERABLES_VERIFICATION.md) - Quick verification
+  script
 
 ______________________________________________________________________
 
@@ -714,7 +1083,7 @@ curl -X POST http://localhost:8000/predict -d '{"user_id":"user_1","top_k":5}'
 
 1. DATA STORAGE (S3):
    ┌──────────┐
-   │   S3     │ 
+   │   S3     │
    │  Bucket  │  
    └────┬─────┘
         │

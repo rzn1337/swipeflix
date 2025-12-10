@@ -1,0 +1,46 @@
+# LLMOps Dependencies for Milestone 2 (Windows-compatible)
+# ==================================
+
+# LLM Provider - Google Gemini
+google-generativeai>=0.3.0,<1.0.0
+
+# LangChain for RAG Pipeline (Bonus)
+langchain>=0.1.0,<0.3.0
+langchain-google-genai>=0.0.6,<1.0.0
+langchain-community>=0.0.10,<0.3.0
+
+# Vector Store - FAISS for local indexing
+faiss-cpu>=1.7.4,<2.0.0
+
+# PyTorch CPU-only (Windows fix - install from PyPI CPU index)
+# On Windows, install with: pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Or use: pip install torch==2.1.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+# For now, we'll make it optional and use fallback embeddings
+
+# Sentence Transformers for embeddings (optional - has fallback)
+# sentence-transformers>=2.2.0,<3.0.0
+
+# Evaluation Metrics
+rouge-score>=0.1.2,<1.0.0
+nltk>=3.8.0,<4.0.0
+sacrebleu>=2.3.0,<3.0.0
+
+# Guardrails (optional - has fallback)
+# presidio-analyzer>=2.2.0,<3.0.0
+# presidio-anonymizer>=2.2.0,<3.0.0
+# detoxify>=0.5.0,<1.0.0
+
+# Text processing
+tiktoken>=0.5.0,<1.0.0
+# unstructured>=0.10.0,<1.0.0  # Optional
+
+# Rate limiting
+ratelimit>=2.2.1,<3.0.0
+
+# Caching
+cachetools>=5.3.0,<6.0.0
+diskcache>=5.6.0,<6.0.0
+
+# Additional monitoring
+opentelemetry-api>=1.20.0,<2.0.0
+opentelemetry-sdk>=1.20.0,<2.0.0

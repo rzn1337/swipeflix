@@ -64,6 +64,31 @@ class Settings(BaseSettings):
     # Canary deployment
     canary: bool = False
 
+    # LLM Settings (Milestone 2)
+    gemini_api_key: Optional[str] = None
+    gemini_model: str = "gemini-2.5-flash"
+    llm_cache_enabled: bool = True
+    llm_cache_dir: str = ".cache/gemini"
+    llm_cache_ttl: int = 86400  # 24 hours
+
+    # RAG Settings
+    faiss_index_path: str = "data/faiss_index"
+    embedding_model: str = "all-MiniLM-L6-v2"
+    rag_top_k: int = 5
+    rag_min_score: float = 0.3
+
+    # Guardrails Settings
+    guardrails_enabled: bool = True
+    pii_filter_enabled: bool = True
+    injection_filter_enabled: bool = True
+    toxicity_filter_enabled: bool = True
+    toxicity_threshold: float = 0.7
+
+    # Rate Limiting (Gemini Free Tier)
+    llm_rpm_limit: int = 5  # 5 Requests Per Minute
+    llm_tpm_limit: int = 250000  # 250K Tokens Per Minute
+    llm_daily_limit: int = 20  # 20 Requests Per Day
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

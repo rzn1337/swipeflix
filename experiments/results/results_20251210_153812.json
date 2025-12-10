@@ -1,0 +1,116 @@
+{
+  "timestamp": "20251210_153812",
+  "num_samples": 5,
+  "comparison": {
+    "strategies": [
+      {
+        "name": "zero_shot",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      },
+      {
+        "name": "few_shot_k3",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      },
+      {
+        "name": "few_shot_k5",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      },
+      {
+        "name": "chain_of_thought",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      },
+      {
+        "name": "meta_prompt",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      }
+    ],
+    "best_rouge_l": "zero_shot",
+    "best_embedding_sim": "zero_shot",
+    "best_factuality": "zero_shot",
+    "best_helpfulness": "zero_shot",
+    "fastest": "zero_shot",
+    "most_efficient": "zero_shot"
+  },
+  "summaries": [
+    {
+      "strategy": "zero_shot",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    },
+    {
+      "strategy": "few_shot_k3",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    },
+    {
+      "strategy": "few_shot_k5",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    },
+    {
+      "strategy": "chain_of_thought",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    },
+    {
+      "strategy": "meta_prompt",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "timestamp": "20251210_154912",
+  "num_samples": 5,
+  "comparison": {
+    "strategies": [
+      {
+        "name": "zero_shot",
+        "rouge_l_f1": 0.18509329540618735,
+        "embedding_similarity": 0.08082521313855465,
+        "factuality": 3.0,
+        "helpfulness": 3.3514285714285714,
+        "latency_ms": 1983.2685470581055,
+        "tokens": 2245,
+        "error_rate": 0.0
+      },
+      {
+        "name": "few_shot_k3",
+        "rouge_l_f1": 0.1453588245488807,
+        "embedding_similarity": 0.10118600832886546,
+        "factuality": 2.6,
+        "helpfulness": 3.7871428571428574,
+        "latency_ms": 2502.9120445251465,
+        "tokens": 3943,
+        "error_rate": 0.0
+      },
+      {
+        "name": "few_shot_k5",
+        "rouge_l_f1": 0.15829269674250201,
+        "embedding_similarity": 0.0990310920736818,
+        "factuality": 3.4,
+        "helpfulness": 4.465714285714285,
+        "latency_ms": 3019.4154739379883,
+        "tokens": 5061,
+        "error_rate": 0.0
+      },
+      {
+        "name": "chain_of_thought",
+        "rouge_l_f1": 0.09054108682015657,
+        "embedding_similarity": 0.06483408404461036,
+        "factuality": 2.0,
+        "helpfulness": 3.1835714285714287,
+        "latency_ms": 2923.3964443206787,
+        "tokens": 3161,
+        "error_rate": 0.0
+      },
+      {
+        "name": "meta_prompt",
+        "rouge_l_f1": 0.0,
+        "embedding_similarity": 0.0,
+        "factuality": 0.0,
+        "helpfulness": 0.0,
+        "latency_ms": 0.0,
+        "tokens": 0,
+        "error_rate": 1.0
+      }
+    ],
+    "best_rouge_l": "zero_shot",
+    "best_embedding_sim": "few_shot_k3",
+    "best_factuality": "few_shot_k5",
+    "best_helpfulness": "few_shot_k5",
+    "fastest": "zero_shot",
+    "most_efficient": "zero_shot"
+  },
+  "summaries": [
+    {
+      "strategy": "zero_shot",
+      "rouge_l_f1": 0.18509329540618735,
+      "embedding_similarity": 0.08082521313855465,
+      "factuality": 3.0,
+      "helpfulness": 3.3514285714285714,
+      "latency_ms": 1983.2685470581055,
+      "tokens": 2245,
+      "error_rate": 0.0
+    },
+    {
+      "strategy": "few_shot_k3",
+      "rouge_l_f1": 0.1453588245488807,
+      "embedding_similarity": 0.10118600832886546,
+      "factuality": 2.6,
+      "helpfulness": 3.7871428571428574,
+      "latency_ms": 2502.9120445251465,
+      "tokens": 3943,
+      "error_rate": 0.0
+    },
+    {
+      "strategy": "few_shot_k5",
+      "rouge_l_f1": 0.15829269674250201,
+      "embedding_similarity": 0.0990310920736818,
+      "factuality": 3.4,
+      "helpfulness": 4.465714285714285,
+      "latency_ms": 3019.4154739379883,
+      "tokens": 5061,
+      "error_rate": 0.0
+    },
+    {
+      "strategy": "chain_of_thought",
+      "rouge_l_f1": 0.09054108682015657,
+      "embedding_similarity": 0.06483408404461036,
+      "factuality": 2.0,
+      "helpfulness": 3.1835714285714287,
+      "latency_ms": 2923.3964443206787,
+      "tokens": 3161,
+      "error_rate": 0.0
+    },
+    {
+      "strategy": "meta_prompt",
+      "rouge_l_f1": 0.0,
+      "embedding_similarity": 0.0,
+      "factuality": 0.0,
+      "helpfulness": 0.0,
+      "latency_ms": 0.0,
+      "tokens": 0,
+      "error_rate": 1.0
+    }
+  ]
+}
